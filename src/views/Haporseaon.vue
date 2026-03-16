@@ -2,8 +2,8 @@
   <div class="space-y-6 text-gray-300">
     <div class="flex justify-between items-end mb-2">
       <div>
-        <h1 class="text-2xl font-bold text-white">Penilaian Hafalan Titah</h1>
-        <p class="text-sm text-gray-400 mt-1">Sistem Penilaian Otomatis (Auto-Save) - SIL HKBP Bengkalis</p>
+        <h1 class="text-2xl font-bold text-white">Penilaian Hata Haporseaon</h1>
+        <p class="text-sm text-gray-400 mt-1">Pengakuan Iman Rasuli - Sistem Auto-Save SIL HKBP Bengkalis</p>
       </div>
     </div>
 
@@ -53,13 +53,13 @@
                 <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
                 <td class="py-3 px-2"><span class="text-blue-400 font-bold">{{ student.kelas }}</span></td>
                 <td class="py-3 px-2">
-                  <select v-model="student.lulus_titah" @change="saveGrade(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                  <select v-model="student.lulus_haporseaon" @change="saveGrade(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
                     <option value="">Belum Lulus</option>
-                    <option v-for="d in 7" :key="'titah'+d" :value="d">Hari {{ d }}</option>
+                    <option v-for="d in 7" :key="'hata'+d" :value="d">Hari {{ d }}</option>
                   </select>
                 </td>
                 <td class="py-3 px-2 text-right font-bold text-teal-400">
-                  {{ hitungSkor(student.lulus_titah) || '-' }}
+                  {{ hitungSkor(student.lulus_haporseaon) || '-' }}
                 </td>
               </tr>
             </tbody>
@@ -98,13 +98,13 @@
                 <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
                 <td class="py-3 px-2"><span class="text-sky-400 font-bold">{{ student.kelas }}</span></td>
                 <td class="py-3 px-2">
-                  <select v-model="student.lulus_titah" @change="saveGrade(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-sky-500 focus:outline-none text-xs transition">
+                  <select v-model="student.lulus_haporseaon" @change="saveGrade(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-sky-500 focus:outline-none text-xs transition">
                     <option value="">Belum Lulus</option>
-                    <option v-for="d in 7" :key="'titah'+d" :value="d">Hari {{ d }}</option>
+                    <option v-for="d in 7" :key="'hata'+d" :value="d">Hari {{ d }}</option>
                   </select>
                 </td>
                 <td class="py-3 px-2 text-right font-bold text-sky-400">
-                  {{ hitungSkor(student.lulus_titah) || '-' }}
+                  {{ hitungSkor(student.lulus_haporseaon) || '-' }}
                 </td>
               </tr>
             </tbody>
@@ -143,7 +143,6 @@ const pageLeft = ref(1)
 const pageRight = ref(1)
 const itemsPerPage = 8 
 
-// === MENAMPILKAN TOAST ===
 const showToast = (message) => {
   toastMsg.value = message
   setTimeout(() => {
@@ -151,35 +150,31 @@ const showToast = (message) => {
   }, 2000)
 }
 
-// === HITUNG SKOR BERDASARKAN ATURAN ===
-// Hari 1=100, 2=97, 3=94, 4=91, 5=88, 6=85, 7=82
+// Menghitung Skor 
 const hitungSkor = (hari) => {
   if (!hari) return null
   const poin = {1:100, 2:97, 3:94, 4:91, 5:88, 6:85, 7:82}
   return poin[hari] || 0
 }
 
-// === FUNGSI MENGAMBIL DATA ===
 const fetchStudents = async () => {
   pageLeft.value = 1
   pageRight.value = 1
   
-  // Ambil Data Murid
   const { data: students, error: err1 } = await supabase.from('students').select('*')
   
-  // Ambil Data Hafalan khusus 'Titah'
+  // FOKUS MENGAMBIL DATA HATA HAPORSEAON
   const { data: hafalan, error: err2 } = await supabase
     .from('hafalan')
     .select('*')
-    .eq('jenis_hafalan', 'Titah')
+    .eq('jenis_hafalan', 'Hata Haporseaon')
 
   if (!err1 && !err2) {
     allStudents.value = students.map(student => {
-      // Cari apakah murid ini sudah punya nilai Titah
       const existingHafalan = hafalan.find(h => h.student_id === student.id)
       return {
         ...student,
-        lulus_titah: existingHafalan ? existingHafalan.lulus_hari_ke : '',
+        lulus_haporseaon: existingHafalan ? existingHafalan.lulus_hari_ke : '',
         hafalan_id: existingHafalan ? existingHafalan.id : null
       }
     })
@@ -194,7 +189,6 @@ const toggleSort = () => {
   sortDesc.value = !sortDesc.value
 }
 
-// === FILTER KELAS 3,4,5 (KIRI) ===
 const filteredLeft = computed(() => {
   let filtered = allStudents.value.filter(s => [3, 4, 5].includes(s.kelas))
   return filtered.sort((a, b) => sortDesc.value ? b.kelas - a.kelas : a.kelas - b.kelas)
@@ -205,7 +199,6 @@ const paginatedLeft = computed(() => {
   return filteredLeft.value.slice(start, start + itemsPerPage)
 })
 
-// === FILTER KELAS 6,7 (KANAN) ===
 const filteredRight = computed(() => {
   let filtered = allStudents.value.filter(s => [6, 7].includes(s.kelas))
   return filtered.sort((a, b) => sortDesc.value ? b.kelas - a.kelas : a.kelas - b.kelas)
@@ -216,12 +209,11 @@ const paginatedRight = computed(() => {
   return filteredRight.value.slice(start, start + itemsPerPage)
 })
 
-// === FUNGSI AUTO-SAVE PENILAIAN ===
 const saveGrade = async (student) => {
-  const skor = hitungSkor(student.lulus_titah)
+  const skor = hitungSkor(student.lulus_haporseaon)
   
-  // Jika diubah menjadi "Belum Lulus", kita bisa menghapus atau mengosongkan nilainya
-  if (!student.lulus_titah) {
+  // Jika "Belum Lulus", hapus dari database
+  if (!student.lulus_haporseaon) {
       if (student.hafalan_id) {
           await supabase.from('hafalan').delete().eq('id', student.hafalan_id)
           student.hafalan_id = null
@@ -230,19 +222,17 @@ const saveGrade = async (student) => {
       return
   }
 
+  // Set jenis_hafalan ke 'Hata Haporseaon'
   const payload = { 
     student_id: student.id, 
-    jenis_hafalan: 'Titah', 
-    lulus_hari_ke: student.lulus_titah, 
+    jenis_hafalan: 'Hata Haporseaon', 
+    lulus_hari_ke: student.lulus_haporseaon, 
     skor: skor 
   }
 
-  // Jika sudah ada (Update)
   if (student.hafalan_id) {
     await supabase.from('hafalan').update(payload).eq('id', student.hafalan_id)
-  } 
-  // Jika belum ada (Insert)
-  else {
+  } else {
     const { data } = await supabase.from('hafalan').insert(payload).select()
     if (data && data.length > 0) student.hafalan_id = data[0].id
   }
@@ -250,45 +240,35 @@ const saveGrade = async (student) => {
   showToast(`Tersimpan: ${student.nama_lengkap} (Skor: ${skor})`)
 }
 
-// === FUNGSI EXPORT PDF DINAMIS ===
+// === FUNGSI EXPORT PDF DINAMIS & AMAN VITE ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF()
   
-  // 1. MENDAPATKAN TANGGAL SAAT INI (Otomatis)
   const tanggalSekarang = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
   
-  // Judul Utama Dokumen
   doc.setFontSize(16)
-  doc.setTextColor(0, 0, 0) // Hitam
-  doc.text(`Rekap Penilaian Hafalan Titah - SIL HKBP`, 14, 15)
+  doc.setTextColor(0, 0, 0)
+  doc.text(`Rekap Penilaian Hata Haporseaon - SIL HKBP`, 14, 15)
   
-  // 2. MENAMBAHKAN TANGGAL CETAK DI BAWAH JUDUL
   doc.setFontSize(10)
-  doc.setTextColor(100, 100, 100) // Warna abu-abu agar elegan
+  doc.setTextColor(100, 100, 100)
   doc.text(`Dicetak pada: ${tanggalSekarang} WIB`, 14, 22)
   
-  // Geser posisi Y sedikit ke bawah agar tabel tidak menabrak teks tanggal
   let currentY = 30 
 
-  // Render Tabel Kiri (Kelas 3-5)
   if (mode === 'all' || mode === 'left') {
     doc.setFontSize(12)
-    doc.setTextColor(0, 0, 0) // Kembalikan ke warna hitam
+    doc.setTextColor(0, 0, 0)
     doc.text('Kategori Kelas 3 - 5', 14, currentY)
     
     const bodyLeft = filteredLeft.value.map((s, idx) => [
       idx + 1, 
       s.nama_lengkap, 
       `Kelas ${s.kelas}`, 
-      s.lulus_titah ? `Hari ${s.lulus_titah}` : 'Belum Lulus',
-      hitungSkor(s.lulus_titah) || '0'
+      s.lulus_haporseaon ? `Hari ${s.lulus_haporseaon}` : 'Belum Lulus',
+      hitungSkor(s.lulus_haporseaon) || '0'
     ])
     
     autoTable(doc, {
@@ -296,22 +276,20 @@ const exportToPDF = (mode) => {
       head: [['No', 'Nama Lengkap', 'Kelas', 'Lulus Hari Ke-', 'Nilai Akhir']],
       body: bodyLeft,
       theme: 'grid',
-      headStyles: { fillColor: [20, 184, 166] } // Warna Teal
+      headStyles: { fillColor: [20, 184, 166] }
     })
     
     currentY = doc.lastAutoTable.finalY + 15
   }
 
-  // Cek apakah sisa halaman muat
   if (currentY > 250 && mode === 'all') {
     doc.addPage()
     currentY = 15
   }
 
-  // Render Tabel Kanan (Kelas 6-7)
   if (mode === 'all' || mode === 'right') {
     doc.setFontSize(12)
-    doc.setTextColor(0, 0, 0) // Kembalikan ke warna hitam
+    doc.setTextColor(0, 0, 0)
     if (mode === 'right') currentY = 30 
     
     doc.text('Kategori Kelas 6 - 7', 14, currentY)
@@ -320,8 +298,8 @@ const exportToPDF = (mode) => {
       idx + 1, 
       s.nama_lengkap, 
       `Kelas ${s.kelas}`, 
-      s.lulus_titah ? `Hari ${s.lulus_titah}` : 'Belum Lulus',
-      hitungSkor(s.lulus_titah) || '0'
+      s.lulus_haporseaon ? `Hari ${s.lulus_haporseaon}` : 'Belum Lulus',
+      hitungSkor(s.lulus_haporseaon) || '0'
     ])
     
     autoTable(doc, {
@@ -329,15 +307,12 @@ const exportToPDF = (mode) => {
       head: [['No', 'Nama Lengkap', 'Kelas', 'Lulus Hari Ke-', 'Nilai Akhir']],
       body: bodyRight,
       theme: 'grid',
-      headStyles: { fillColor: [14, 165, 233] } // Warna Sky Blue
+      headStyles: { fillColor: [14, 165, 233] }
     })
   }
 
-  // 3. MENGUBAH NAMA FILE AGAR ADA TANGGALNYA
-  // Format: YYYY-MM-DD (Contoh: 2026-03-16)
   const formatTanggalFile = new Date().toISOString().split('T')[0] 
-  let fileName = `Nilai_Titah_SIL_${formatTanggalFile}`
-  
+  let fileName = `Nilai_Haporseaon_SIL_${formatTanggalFile}`
   if (mode === 'left') fileName += `_Kls3-5`
   else if (mode === 'right') fileName += `_Kls6-7`
   else fileName += `_SemuaKelas`
