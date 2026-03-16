@@ -258,6 +258,7 @@ const exportToPDF = (mode) => {
   
   let currentY = 30 
 
+  // Render Tabel Kiri (Kelas 3-5)
   if (mode === 'all' || mode === 'left') {
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
@@ -279,19 +280,25 @@ const exportToPDF = (mode) => {
       headStyles: { fillColor: [20, 184, 166] }
     })
     
+    // Update currentY agar tabel berikutnya berada di bawah tabel ini (jika mode 'all')
     currentY = doc.lastAutoTable.finalY + 15
   }
 
-  if (currentY > 250 && mode === 'all') {
-    doc.addPage()
-    currentY = 15
-  }
-
+  // Render Tabel Kanan (Kelas 6-7)
   if (mode === 'all' || mode === 'right') {
+    
+    // Jika hanya klik 'right', paksa posisi teks mulai dari atas
+    if (mode === 'right') {
+      currentY = 30 
+    } 
+    // Jika mode 'all', pastikan sisa halamannya cukup. Jika mepet batas bawah (>270), buat halaman baru.
+    else if (currentY > 270) {
+      doc.addPage()
+      currentY = 15
+    }
+
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
-    if (mode === 'right') currentY = 30 
-    
     doc.text('Kategori Kelas 6 - 7', 14, currentY)
     
     const bodyRight = filteredRight.value.map((s, idx) => [
@@ -311,12 +318,19 @@ const exportToPDF = (mode) => {
     })
   }
 
+  // Menyiapkan penamaan file (jika di-download manual dari viewer browser)
   const formatTanggalFile = new Date().toISOString().split('T')[0] 
   let fileName = `Nilai_Haporseaon_SIL_${formatTanggalFile}`
   if (mode === 'left') fileName += `_Kls3-5`
   else if (mode === 'right') fileName += `_Kls6-7`
   else fileName += `_SemuaKelas`
   
-  doc.save(`${fileName}.pdf`)
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  // Mengubah data PDF menjadi format Blob
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  
+  // Membuka tab baru yang berisi tampilan PDF
+  window.open(pdfUrl, '_blank')
 }
 </script>

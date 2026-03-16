@@ -125,7 +125,7 @@ const filteredStudents = computed(() => {
   return aggregatedStudents.value
 })
 
-// === FUNGSI EXPORT PDF FINAL ===
+// === FUNGSI EXPORT PDF FINAL (DENGAN PREVIEW TAB BARU) ===
 const exportToPDF = () => {
   const doc = new jsPDF()
   
@@ -169,7 +169,16 @@ const exportToPDF = () => {
     }
   })
   
+  // Menyiapkan penamaan file (jika di-download manual dari viewer browser)
   const formatTanggalFile = new Date().toISOString().split('T')[0] 
-  doc.save(`Laporan_Akhir_SIL_${textFilter}_${formatTanggalFile}.pdf`)
+  const fileName = `Laporan_Akhir_SIL_${textFilter}_${formatTanggalFile}`
+  
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  // Mengubah data PDF menjadi format Blob
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  
+  // Membuka tab baru yang berisi tampilan PDF
+  window.open(pdfUrl, '_blank')
 }
 </script>

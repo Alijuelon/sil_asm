@@ -244,8 +244,7 @@ const getTanggalCetak = () => {
   })
 }
 const formatTanggalFile = new Date().toISOString().split('T')[0] 
-
-// === EXPORT 1: PDF HARIAN ===
+// === EXPORT 1: PDF HARIAN (DENGAN PREVIEW TAB BARU) ===
 const exportDailyPDF = () => {
   const doc = new jsPDF()
   doc.setFontSize(16)
@@ -269,10 +268,16 @@ const exportDailyPDF = () => {
     headStyles: { fillColor: [20, 184, 166] }
   })
   
-  doc.save(`WaliKelas_Hari_${selectedDay.value}_${formatTanggalFile}.pdf`)
+  // Penamaan file jika di-download manual
+  const fileName = `WaliKelas_Hari_${selectedDay.value}_${formatTanggalFile}`
+  
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  window.open(pdfUrl, '_blank')
 }
 
-// === EXPORT 2: PDF REKAP 7 HARI ===
+// === EXPORT 2: PDF REKAP 7 HARI (DENGAN PREVIEW TAB BARU) ===
 const exportFinal7DaysPDF = async () => {
   const { data: allTugas } = await supabase.from('tugas').select('*')
   
@@ -303,6 +308,12 @@ const exportFinal7DaysPDF = async () => {
     columnStyles: { 4: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } }
   })
   
-  doc.save(`Laporan_WaliKelas_7Hari_${formatTanggalFile}.pdf`)
+  // Penamaan file jika di-download manual
+  const fileName = `Laporan_WaliKelas_7Hari_${formatTanggalFile}`
+  
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  window.open(pdfUrl, '_blank')
 }
 </script>

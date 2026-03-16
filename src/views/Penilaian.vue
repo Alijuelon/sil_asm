@@ -250,7 +250,7 @@ const saveGrade = async (student) => {
   showToast(`Tersimpan: ${student.nama_lengkap} (Skor: ${skor})`)
 }
 
-// === FUNGSI EXPORT PDF DINAMIS ===
+// === FUNGSI EXPORT PDF DINAMIS (DENGAN PREVIEW TAB BARU) ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF()
   
@@ -274,7 +274,6 @@ const exportToPDF = (mode) => {
   doc.setTextColor(100, 100, 100) // Warna abu-abu agar elegan
   doc.text(`Dicetak pada: ${tanggalSekarang} WIB`, 14, 22)
   
-  // Geser posisi Y sedikit ke bawah agar tabel tidak menabrak teks tanggal
   let currentY = 30 
 
   // Render Tabel Kiri (Kelas 3-5)
@@ -299,21 +298,25 @@ const exportToPDF = (mode) => {
       headStyles: { fillColor: [20, 184, 166] } // Warna Teal
     })
     
+    // Update currentY agar tabel berikutnya berada di bawah tabel ini (jika mode 'all')
     currentY = doc.lastAutoTable.finalY + 15
-  }
-
-  // Cek apakah sisa halaman muat
-  if (currentY > 250 && mode === 'all') {
-    doc.addPage()
-    currentY = 15
   }
 
   // Render Tabel Kanan (Kelas 6-7)
   if (mode === 'all' || mode === 'right') {
+    
+    // Jika hanya klik 'right', paksa posisi teks mulai dari atas
+    if (mode === 'right') {
+      currentY = 30 
+    } 
+    // Jika mode 'all', pastikan sisa halamannya cukup. Jika mepet batas bawah (>270), buat halaman baru.
+    else if (currentY > 270) {
+      doc.addPage()
+      currentY = 15
+    }
+
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0) // Kembalikan ke warna hitam
-    if (mode === 'right') currentY = 30 
-    
     doc.text('Kategori Kelas 6 - 7', 14, currentY)
     
     const bodyRight = filteredRight.value.map((s, idx) => [
@@ -334,7 +337,6 @@ const exportToPDF = (mode) => {
   }
 
   // 3. MENGUBAH NAMA FILE AGAR ADA TANGGALNYA
-  // Format: YYYY-MM-DD (Contoh: 2026-03-16)
   const formatTanggalFile = new Date().toISOString().split('T')[0] 
   let fileName = `Nilai_Titah_SIL_${formatTanggalFile}`
   
@@ -342,6 +344,12 @@ const exportToPDF = (mode) => {
   else if (mode === 'right') fileName += `_Kls6-7`
   else fileName += `_SemuaKelas`
   
-  doc.save(`${fileName}.pdf`)
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  // Mengubah data PDF menjadi format Blob
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  
+  // Membuka tab baru yang berisi tampilan PDF
+  window.open(pdfUrl, '_blank')
 }
 </script>
