@@ -3,7 +3,7 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-white">Wali Kelas Review</h1>
-        <p class="text-sm text-gray-400 mt-1">Review Komik, Tugas Harian & Titah Akhir (Khusus Kelas 3-5)</p>
+        <p class="text-sm text-gray-400 mt-1">Review Komik & Tugas Harian (Khusus Kelas 3-5)</p>
       </div>
     </div>
 
@@ -43,8 +43,8 @@
           <h2 class="text-lg font-bold text-teal-400">Daftar Anak Kategori Kelas 3 - 5</h2>
           <span class="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredStudents.length }} Anak</span>
         </div>
-        <button @click="markAllDone" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 font-bold">
-          ✅ Selesai Semua
+        <button @click="markAllA" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 font-bold">
+          ✅ Beri Nilai "A" Semua
         </button>
       </div>
 
@@ -55,15 +55,14 @@
               <th class="p-3 font-medium rounded-tl-lg w-12">No</th>
               <th class="p-3 font-medium">Nama Lengkap</th>
               <th class="p-3 font-medium text-center w-20">Kelas</th>
-              <th class="p-3 font-medium w-40">Review Komik</th>
-              <th class="p-3 font-medium w-40">Tugas Harian</th>
-              <th class="p-3 font-medium w-40">Review Titah Akhir</th>
-              <th class="p-3 font-medium text-center w-16 rounded-tr-lg">Skor</th>
+              <th class="p-3 font-medium w-48">Review Komik</th>
+              <th class="p-3 font-medium w-48">Tugas Harian</th>
+              <th class="p-3 font-medium text-center w-24 rounded-tr-lg">Rerata Skor</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="paginatedStudents.length === 0">
-              <td colspan="7" class="text-center py-8 text-gray-500">Tidak ada data kelas 3-5.</td>
+              <td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data kelas 3-5.</td>
             </tr>
             <tr v-for="(student, index) in paginatedStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
               <td class="p-3 text-gray-500">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
@@ -72,27 +71,24 @@
               
               <td class="p-3">
                 <select v-model="student.status_komik" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum</option>
-                  <option value="Selesai">✅ Selesai</option>
+                  <option value="Belum">Belum Dinilai</option>
+                  <option value="A">Nilai A (95)</option>
+                  <option value="B">Nilai B (85)</option>
+                  <option value="C">Nilai C (70)</option>
                 </select>
               </td>
               
               <td class="p-3">
                 <select v-model="student.status_tugas" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum</option>
-                  <option value="Selesai">✅ Selesai</option>
-                </select>
-              </td>
-
-              <td class="p-3">
-                <select v-model="student.review_titah" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum</option>
-                  <option value="Selesai">✅ Selesai</option>
+                  <option value="Belum">Belum Dinilai</option>
+                  <option value="A">Nilai A (95)</option>
+                  <option value="B">Nilai B (85)</option>
+                  <option value="C">Nilai C (70)</option>
                 </select>
               </td>
 
               <td class="p-3 text-center font-bold text-teal-400 text-base">
-                {{ calculateDailyScore(student.status_komik, student.status_tugas, student.review_titah) }}
+                {{ calculateDailyScore(student.status_komik, student.status_tugas) }}
               </td>
             </tr>
           </tbody>
@@ -125,28 +121,36 @@ const sortDesc = ref(false)
 const toastMsg = ref('')
 
 const currentPage = ref(1)
-const itemsPerPage = 10 // Bisa menampung 10 anak sekaligus per halaman
+const itemsPerPage = 10 
 
 const showToast = (message) => {
   toastMsg.value = message
   setTimeout(() => toastMsg.value = '', 2000)
 }
 
-// === HITUNG SKOR BEDA BOBOT ===
-// Komik (30) + Tugas (30) + Titah Akhir (40) = 100
-const calculateDailyScore = (komik, tugas, titah) => {
-  let score = 0
-  if (komik === 'Selesai') score += 30
-  if (tugas === 'Selesai') score += 30
-  if (titah === 'Selesai') score += 40
-  return score
+// === HITUNG SKOR BERDASARKAN HURUF ===
+// A = 95, B = 85, C = 70
+const getPoint = (grade) => {
+  if (grade === 'A') return 95
+  if (grade === 'B') return 85
+  if (grade === 'C') return 70
+  return 0
+}
+
+const calculateDailyScore = (komik, tugas) => {
+  if (komik === 'Belum' && tugas === 'Belum') return 0
+  
+  const pKomik = getPoint(komik)
+  const pTugas = getPoint(tugas)
+  
+  // Mencari Rata-rata dari 2 penugasan
+  return Math.round((pKomik + pTugas) / 2)
 }
 
 // === FUNGSI MENGAMBIL DATA KHUSUS KELAS 3-5 ===
 const fetchStudents = async () => {
   currentPage.value = 1
   
-  // 1. Ambil murid khusus kelas 3, 4, 5
   const { data: students, error: err1 } = await supabase
     .from('students')
     .select('*')
@@ -154,15 +158,12 @@ const fetchStudents = async () => {
     
   if (err1) return console.error(err1)
 
-  // 2. Ambil data Tugas Harian
   const { data: tugasDB, error: err2 } = await supabase
     .from('tugas')
     .select('*')
     .eq('hari', selectedDay.value)
 
-  if (err2) {
-    console.warn("Tabel tugas bermasalah/belum diupdate.", err2)
-  }
+  if (err2) console.warn("Tabel tugas bermasalah/belum diupdate.", err2)
 
   allStudents.value = students.map(student => {
     const existingTugas = tugasDB?.find(t => t.student_id === student.id)
@@ -170,7 +171,6 @@ const fetchStudents = async () => {
       ...student,
       status_komik: existingTugas?.status_komik || 'Belum',
       status_tugas: existingTugas?.status_tugas || 'Belum',
-      review_titah: existingTugas?.review_titah || 'Belum', // Kolom baru
       tugas_id: existingTugas?.id || null
     }
   })
@@ -197,38 +197,44 @@ const paginatedStudents = computed(() => {
 
 // === FUNGSI AUTO-SAVE ===
 const saveTugas = async (student, isSilent = false) => {
-  const skor = calculateDailyScore(student.status_komik, student.status_tugas, student.review_titah)
+  const skor = calculateDailyScore(student.status_komik, student.status_tugas)
   
   const payload = { 
     student_id: student.id, 
     hari: selectedDay.value, 
     status_komik: student.status_komik, 
     status_tugas: student.status_tugas, 
-    review_titah: student.review_titah, // Disimpan ke DB
     skor_harian: skor 
   }
 
   if (student.tugas_id) {
-    await supabase.from('tugas').update(payload).eq('id', student.tugas_id)
+    const { error } = await supabase.from('tugas').update(payload).eq('id', student.tugas_id)
+    if (error) {
+      console.error("Gagal Update:", error)
+      return alert("Gagal menyimpan data!")
+    }
   } else {
-    const { data } = await supabase.from('tugas').insert(payload).select()
+    const { data, error } = await supabase.from('tugas').insert(payload).select()
+    if (error) {
+      console.error("Gagal Insert:", error)
+      return alert("Gagal menyimpan data baru!")
+    }
     if (data && data.length > 0) student.tugas_id = data[0].id
   }
 
-  if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (Skor: ${skor})`)
+  if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (Rerata: ${skor})`)
 }
 
-// === TANDAI SEMUA SELESAI ===
-const markAllDone = async () => {
+// === TANDAI NILAI "A" SEMUA ===
+const markAllA = async () => {
   for (let student of filteredStudents.value) {
     let changed = false
-    if (student.status_komik !== 'Selesai') { student.status_komik = 'Selesai'; changed = true }
-    if (student.status_tugas !== 'Selesai') { student.status_tugas = 'Selesai'; changed = true }
-    if (student.review_titah !== 'Selesai') { student.review_titah = 'Selesai'; changed = true }
+    if (student.status_komik !== 'A') { student.status_komik = 'A'; changed = true }
+    if (student.status_tugas !== 'A') { student.status_tugas = 'A'; changed = true }
     
-    if (changed) await saveTugas(student, true) // Simpan diam-diam (silent)
+    if (changed) await saveTugas(student, true)
   }
-  showToast(`Semua anak Kelas 3-5 berhasil ditandai selesai!`)
+  showToast(`Semua anak Kelas 3-5 diberi Nilai A!`)
 }
 
 // === FUNGSI BANTUAN TANGGAL CETAK ===
@@ -252,12 +258,12 @@ const exportDailyPDF = () => {
   doc.setTextColor(0, 0, 0)
   
   const bodyData = filteredStudents.value.map((s, idx) => [
-    idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, s.status_komik, s.status_tugas, s.review_titah, calculateDailyScore(s.status_komik, s.status_tugas, s.review_titah)
+    idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, s.status_komik, s.status_tugas, calculateDailyScore(s.status_komik, s.status_tugas)
   ])
   
   autoTable(doc, {
     startY: 28,
-    head: [['No', 'Nama Lengkap', 'Kelas', 'Komik', 'Tugas', 'Titah Akhir', 'Total']],
+    head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Komik', 'Nilai Tugas', 'Rerata Harian']],
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: [20, 184, 166] }
@@ -281,14 +287,16 @@ const exportFinal7DaysPDF = async () => {
     const tugasAnak = allTugas?.filter(t => t.student_id === s.id) || []
     let totalSkor = 0
     tugasAnak.forEach(t => totalSkor += t.skor_harian)
-    const rerata = Math.round(totalSkor / 7)
     
-    return [idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, `${totalSkor} / 700`, rerata]
+    // Rata-rata dari 7 hari kegiatan
+    const rerataAkhir = Math.round(totalSkor / 7)
+    
+    return [idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, totalSkor.toString(), rerataAkhir]
   })
   
   autoTable(doc, {
     startY: 28,
-    head: [['No', 'Nama Lengkap', 'Kelas', 'Total Skor Terkumpul', 'NILAI RATA-RATA']],
+    head: [['No', 'Nama Lengkap', 'Kelas', 'Total Rerata Harian', 'NILAI RATA-RATA AKHIR']],
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: [15, 23, 42] },
