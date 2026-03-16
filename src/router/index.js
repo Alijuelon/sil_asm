@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { supabase } from "../supabase";
 
 // Import semua komponen
+import LandingPage from "../views/LandingPage.vue"; // KOMPONEN BARU KITA 🚀
 import Dashboard from "../views/Dashboard.vue";
 import Absensi from "../views/Absensi.vue";
 import Penilaian from "../views/Penilaian.vue";
@@ -9,12 +10,24 @@ import Haporseaon from "../views/Haporseaon.vue";
 import LaporanAkhir from "../views/LaporanAkhir.vue";
 import Login from "../views/Login.vue";
 import KelolaASM from "../views/KelolaASM.vue";
-import Tugas from "../views/Tugas.vue"; // INI YANG KETINGGALAN KAK! 😊
+import Tugas from "../views/Tugas.vue";
 
 const routes = [
-  { path: "/login", name: "Login", component: Login },
+  // Rute Publik
+  { 
+    path: "/", 
+    name: "LandingPage", 
+    component: LandingPage 
+  },
+  { 
+    path: "/login", 
+    name: "Login", 
+    component: Login 
+  },
+  
+  // Rute Privat (Butuh Login)
   {
-    path: "/",
+    path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
     meta: { requiresAuth: true },
@@ -68,11 +81,16 @@ router.beforeEach(async (to, from, next) => {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Jika halaman butuh login TAPI user belum login -> Lempar ke Login
   if (to.meta.requiresAuth && !session) {
     next({ name: "Login" });
-  } else if (to.name === "Login" && session) {
+  } 
+  // Jika user SUDAH login TAPI mencoba akses halaman Login atau Landing Page -> Lempar ke Dashboard
+  else if ((to.name === "Login" || to.name === "LandingPage") && session) {
     next({ name: "Dashboard" });
-  } else {
+  } 
+  // Sisanya aman, izinkan masuk
+  else {
     next();
   }
 });
