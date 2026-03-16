@@ -268,7 +268,6 @@ const markAllOnTime = async (section) => {
 
 // === FUNGSI EXPORT PDF DINAMIS (VERSI VITE AMAN) ===
 const exportToPDF = (mode) => {
-  // Pastikan huruf j dan PDF sesuai dengan import { jsPDF }
   const doc = new jsPDF() 
   
   doc.setFontSize(16)
@@ -281,47 +280,51 @@ const exportToPDF = (mode) => {
     doc.setFontSize(12)
     doc.text('Kategori Kelas 3 - 5', 14, currentY)
     
-   // MENGUBAH STATUS MENJADI SKOR
+    // MENGUBAH STATUS MENJADI SKOR
     const bodyLeft = filteredLeft.value.map((s, idx) => [
       idx + 1, 
       s.nama_lengkap, 
       `Kelas ${s.kelas}`, 
-      s.status ? getSkor(s.status) : '0' // Memanggil fungsi getSkor
+      s.status ? getSkor(s.status) : '0' 
     ])
     
     autoTable(doc, {
       startY: currentY + 5,
-      // MENGUBAH JUDUL KOLOM
       head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Kehadiran']], 
       body: bodyLeft,
       theme: 'grid',
       headStyles: { fillColor: [20, 184, 166] }
     })
-  }
 
-  // Cek apakah sisa halaman muat
-  if (currentY > 250 && mode === 'all') {
-    doc.addPage()
-    currentY = 15
+    // Update currentY agar tabel berikutnya berada di bawah tabel ini (jika mode 'all')
+    currentY = doc.lastAutoTable.finalY + 15 
   }
 
   // Render Tabel Kanan (Kelas 6-7)
   if (mode === 'all' || mode === 'right') {
-    doc.setFontSize(12)
-    if (mode === 'right') currentY = 25 
     
+    // Jika hanya klik 'right', paksa posisi teks mulai dari atas
+    if (mode === 'right') {
+      currentY = 25 
+    } 
+    // Jika mode 'all', pastikan sisa halamannya cukup. Jika mepet batas bawah (>270), buat halaman baru.
+    else if (currentY > 270) {
+      doc.addPage()
+      currentY = 15
+    }
+
+    doc.setFontSize(12)
     doc.text('Kategori Kelas 6 - 7', 14, currentY)
     
-   const bodyRight = filteredRight.value.map((s, idx) => [
+    const bodyRight = filteredRight.value.map((s, idx) => [
       idx + 1, 
       s.nama_lengkap, 
       `Kelas ${s.kelas}`, 
-      s.status ? getSkor(s.status) : '0' // Memanggil fungsi getSkor
+      s.status ? getSkor(s.status) : '0'
     ])
     
     autoTable(doc, {
       startY: currentY + 5,
-      // MENGUBAH JUDUL KOLOM
       head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Kehadiran']], 
       body: bodyRight,
       theme: 'grid',
@@ -329,11 +332,18 @@ const exportToPDF = (mode) => {
     })
   }
 
+  // Menyiapkan penamaan file (opsional jika dibutuhkan saat save manual dari viewer browser)
   let fileName = `Absensi_SIL_Hari_${selectedDay.value}`
   if (mode === 'left') fileName += `_Kls3-5`
   else if (mode === 'right') fileName += `_Kls6-7`
   else fileName += `_SemuaKelas`
   
-  doc.save(`${fileName}.pdf`)
+  // === PREVIEW MODE: Buka PDF di Tab Baru ===
+  // Mengubah data PDF menjadi format Blob agar bisa di-preview di browser
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  
+  // Membuka tab baru yang berisi tampilan PDF (Bisa print/download dari sini)
+  window.open(pdfUrl, '_blank')
 }
 </script>
