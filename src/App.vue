@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$route.name === 'Login'">
+  <div v-if="isPublicRoute" class="w-full min-h-screen">
     <router-view></router-view>
   </div>
 
@@ -32,7 +32,7 @@
         
         <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-gray-500 uppercase px-3 mb-2 mt-1 tracking-wider">Menu Utama</div>
-          <router-link @click="isSidebarOpen = false" to="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
+          <router-link @click="isSidebarOpen = false" to="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">🏠</span> Dashboard
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/kelola-asm" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
@@ -75,7 +75,6 @@
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
       
       <header class="h-16 flex items-center justify-between px-4 lg:px-8 border-b border-gray-800 bg-[#0b1121] shrink-0">
-        
         <div class="flex items-center gap-4 w-full">
           <button @click="isSidebarOpen = true" class="lg:hidden text-gray-300 hover:text-white focus:outline-none">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -118,13 +117,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue' // Tambahkan computed
 import { supabase } from './supabase'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router' // Tambahkan useRoute
 
 const router = useRouter()
+const route = useRoute() // Panggil useRoute
+
 const showLogoutModal = ref(false)
-const isSidebarOpen = ref(false) // State baru untuk mengontrol sidebar di HP
+const isSidebarOpen = ref(false)
+
+// Cek apakah halaman yang dibuka adalah Landing Page ATAU Login
+const isPublicRoute = computed(() => {
+  return route.name === 'LandingPage' || route.name === 'Login'
+})
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
