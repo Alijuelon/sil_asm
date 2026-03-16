@@ -9,8 +9,8 @@
         <div class="w-16 h-16 bg-teal-500 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg shadow-teal-500/20">
           SIL
         </div>
-        <h2 class="text-3xl font-bold text-white tracking-tight">Login Admin</h2>
-        <p class="text-gray-400 mt-2 text-sm font-medium uppercase tracking-widest">HKBP BENGKALIS 2026</p>
+        <h2 class="text-3xl font-bold text-white tracking-tight">Login Akun</h2>
+        <p class="text-gray-400 mt-2 text-sm font-medium uppercase tracking-widest">Sekolah Injil Libur ASM HKBP BENGKALIS 2026</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-5">

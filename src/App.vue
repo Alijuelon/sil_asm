@@ -19,8 +19,8 @@
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold shadow-lg shadow-teal-500/30">SIL</div>
           <div>
-            <h2 class="text-white font-bold tracking-widest text-lg">HKBP APP</h2>
-            <p class="text-[10px] text-teal-400 font-bold tracking-wider">ADMIN PANEL</p>
+            <h2 class="text-white font-bold tracking-widest text-lg">ASM HKBP BENGKALIS</h2>
+            <p class="text-[10px] text-teal-400 font-bold tracking-wider">Sekolah Injil Libur</p>
           </div>
         </div>
         <button @click="isSidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white">
