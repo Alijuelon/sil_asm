@@ -110,7 +110,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue'
+// UBAH IMPORT INI: dari 'vue' menjadi 'vue-router'
+import { useRouter } from 'vue-router' 
 
 const router = useRouter()
 
