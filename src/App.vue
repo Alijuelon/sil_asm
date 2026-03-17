@@ -123,52 +123,69 @@
 
   </div>
 </template>
-
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from './supabase'
 
 const router = useRouter()
 const route = useRoute()
 
-// Variabel Utama yang sebelumnya hilang
 const isSidebarOpen = ref(false)
 const showLogoutModal = ref(false)
 const currentUserEmail = ref('')
 
-// Deteksi apakah rute ini adalah halaman Login/Landing Page
+// Deteksi rute publik (Login/Landing)
 const isPublicRoute = computed(() => {
   return ['Login', 'LandingPage'].includes(route.name)
 })
 
-// Dinamis: Menentukan Nama dan Inisial di Header
+// === LOGIKA NAMA PROFIL DINAMIS DARI EMAIL ===
 const profileName = computed(() => {
-  if (currentUserEmail.value === 'samuelMT@gmail.com') return 'Samuel MT'
-  if (currentUserEmail.value === 'alijuelonsinaga01@gmail.com') return 'Ali Sinaga'
-  return 'Admin'
+  if (!currentUserEmail.value) return 'Admin'
+  
+  // Ambil teks sebelum tanda '@' (contoh: samuelMT@gmail.com -> samuelMT)
+  const namePart = currentUserEmail.value.split('@')[0]
+  
+  // (Opsional) Huruf kapital di awal kata
+  return namePart.charAt(0).toUpperCase() + namePart.slice(1)
 })
 
+// === LOGIKA INISIAL DINAMIS ===
 const profileInitials = computed(() => {
-  if (currentUserEmail.value === 'samuelMT@gmail.com') return 'SM'
-  if (currentUserEmail.value === 'alijuelonsinaga01@gmail.com') return 'AS'
-  return 'AD'
+  if (!currentUserEmail.value) return 'AD'
+  
+  const namePart = currentUserEmail.value.split('@')[0]
+  
+  // Ambil maksimal 2 huruf pertama, jadikan huruf besar (contoh: samuelMT -> SA)
+  return namePart.substring(0, 2).toUpperCase()
 })
 
 // Mengecek siapa yang sedang login saat aplikasi dibuka
-onMounted(async () => {
+const checkUser = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     currentUserEmail.value = user.email
+  } else {
+    currentUserEmail.value = ''
   }
+}
+
+onMounted(() => {
+  checkUser()
+})
+
+// Memantau perubahan rute (Agar kalau baru login, emailnya langsung ter-update)
+watch(route, () => {
+  checkUser()
 })
 
 // Fungsi Logout
 const handleLogout = async () => {
-  showLogoutModal.value = false // Tutup modal dulu
-  await supabase.auth.signOut() // Proses logout di Supabase
+  showLogoutModal.value = false 
+  await supabase.auth.signOut() 
   currentUserEmail.value = '' 
-  router.push('/login') // Lempar ke halaman login
+  router.push('/login') 
 }
 </script>
 
