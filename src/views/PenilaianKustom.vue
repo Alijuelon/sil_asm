@@ -24,69 +24,60 @@
         <div class="flex flex-col sm:flex-row gap-3">
           <select 
             v-model="selectedMode"
-            class="sm:w-1/2 bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-sky-500 focus:outline-none transition font-bold"
+            class="flex-1 bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-sky-500 focus:outline-none transition font-bold"
           >
             <option value="">-- Pilih Topik Tersimpan --</option>
             <option v-for="topik in availableTopics" :key="topik" :value="topik">📁 {{ topik }}</option>
-            <option value="BARU" class="bg-sky-900 font-bold">➕ Buat Topik Baru...</option>
           </select>
 
-          <input 
-            v-if="selectedMode === 'BARU'"
-            v-model="newTopicName" 
-            type="text" 
-            placeholder="Ketik topik (cth: Tokoh Daud)" 
-            class="sm:w-1/2 bg-[#0f172a] border border-sky-500 border-dashed rounded-lg p-2.5 text-white focus:border-sky-400 focus:outline-none transition font-bold placeholder-gray-500"
-          >
+          <button @click="() => loadPenilaianData(false)" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg transition whitespace-nowrap flex items-center justify-center gap-2">
+            <span>🔍</span> Buka Tabel
+          </button>
+          
+          <div class="hidden sm:block w-px bg-gray-700 mx-1"></div>
 
-          <button @click="loadPenilaianData" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg transition whitespace-nowrap flex items-center justify-center gap-2">
-            <span>🚀</span> Buka Tabel Nilai
+          <button @click="openCreateModal" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg transition whitespace-nowrap flex items-center justify-center gap-2">
+            <span>➕</span> Buat Topik Baru
           </button>
         </div>
       </div>
     </div>
 
     <div v-if="activeTopic">
-      
       <div class="bg-[#151e32] border border-gray-800 p-4 rounded-xl shadow-lg mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         
-        <div class="flex items-center flex-wrap gap-3">
-          <h2 class="text-lg font-bold text-sky-400">
-            Menilai: <span class="text-white border-b border-sky-500">"{{ activeTopic }}"</span> 
-            <span class="text-gray-500 text-sm ml-2">(H-{{ selectedDay }})</span>
+        <div class="flex items-center flex-wrap gap-2 w-full lg:w-auto">
+          <h2 class="text-lg font-bold text-sky-400 mr-2">
+            Menilai: <span class="text-white border-b border-sky-500 pb-0.5">"{{ activeTopic }}"</span> 
+            <span class="text-emerald-400 font-black text-sm ml-2 bg-emerald-900/30 px-2 py-1 rounded">(H-{{ selectedDay }})</span>
           </h2>
+          <button @click="openEditModal" class="text-xs bg-amber-900/40 text-amber-400 hover:bg-amber-600 hover:text-white px-3 py-1.5 rounded-lg border border-amber-800/50 transition flex items-center gap-1 font-bold">
+            ✏️ Ubah Nama
+          </button>
           <button @click="deleteTopic" class="text-xs bg-red-900/40 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-800/50 transition flex items-center gap-1 font-bold">
-            🗑️ Hapus Topik
+            🗑️ Hapus
           </button>
         </div>
         
-        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-          <div class="flex flex-wrap gap-1 bg-[#0f172a] border border-gray-700 p-1.5 rounded-lg">
-            <span class="text-xs text-gray-500 font-bold px-2 py-1.5">Kls 3-5:</span>
-            <button @click="exportToPDF('left')" class="bg-teal-900/30 text-teal-400 hover:bg-teal-800 px-3 py-1.5 rounded transition text-xs font-medium">📄 H-{{ selectedDay }}</button>
-            <button @click="export7DaysPDF('left')" class="bg-teal-600 text-white hover:bg-teal-700 px-3 py-1.5 rounded transition text-xs font-bold shadow-md">📑 Rekap 7 Hari</button>
-          </div>
-          
-          <div class="flex flex-wrap gap-1 bg-[#0f172a] border border-gray-700 p-1.5 rounded-lg">
-            <span class="text-xs text-gray-500 font-bold px-2 py-1.5">Kls 6-7:</span>
-            <button @click="exportToPDF('right')" class="bg-sky-900/30 text-sky-400 hover:bg-sky-800 px-3 py-1.5 rounded transition text-xs font-medium">📄 H-{{ selectedDay }}</button>
-            <button @click="export7DaysPDF('right')" class="bg-sky-600 text-white hover:bg-sky-700 px-3 py-1.5 rounded transition text-xs font-bold shadow-md">📑 Rekap 7 Hari</button>
-          </div>
+        <div class="flex items-center bg-[#0f172a] border border-gray-700 p-1 rounded-lg">
+          <button @click="currentDisplayMode = 'all'" :class="currentDisplayMode === 'all' ? 'bg-sky-600 text-white' : 'text-gray-400 hover:text-white'" class="px-3 py-1.5 rounded text-xs font-bold transition">Semua</button>
+          <button @click="currentDisplayMode = '3-5'" :class="currentDisplayMode === '3-5' ? 'bg-teal-600 text-white' : 'text-gray-400 hover:text-white'" class="px-3 py-1.5 rounded text-xs font-bold transition">Kls 3-5</button>
+          <button @click="currentDisplayMode = '6-7'" :class="currentDisplayMode === '6-7' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'" class="px-3 py-1.5 rounded text-xs font-bold transition">Kls 6-7</button>
         </div>
-
       </div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div :class="currentDisplayMode === 'all' ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'" class="grid gap-6 transition-all duration-300">
         
-        <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
+        <div v-if="currentDisplayMode === 'all' || currentDisplayMode === '3-5'" class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
           <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center gap-2">
             <div>
               <h2 class="text-lg font-bold text-teal-400">👦👧 Kelas 3 - 5</h2>
               <span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredLeft.length }} Anak</span>
             </div>
-            <button @click="markAllToday('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg shadow transition font-bold text-center">
-              ✅ Set Hapal Hari {{ selectedDay }}
-            </button>
+            <div class="flex gap-2">
+              <button @click="exportToPDF('left')" class="text-xs bg-[#0f172a] text-teal-400 hover:bg-teal-900 px-3 py-2 rounded-lg border border-teal-800/50 transition font-bold" title="Cetak Hari Ini">📄 PDF</button>
+              <button @click="markAllA('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg shadow transition font-bold">✅ Beri Nilai A</button>
+            </div>
           </div>
 
           <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
@@ -108,21 +99,17 @@
                   <td class="py-3 px-2 text-center"><span class="text-teal-400 font-bold bg-teal-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                   <td class="py-3 px-2">
                     <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                      <option value="Belum">-- Pilih Nilai --</option>
-                      <optgroup label="Sesuai Hari Setor (Hafalan)">
-                        <option value="Hari 1">Lancar Hari 1 (100)</option>
-                        <option value="Hari 2">Lancar Hari 2 (97)</option>
-                        <option value="Hari 3">Lancar Hari 3 (94)</option>
-                        <option value="Hari 4">Lancar Hari 4 (91)</option>
-                        <option value="Hari 5">Lancar Hari 5 (88)</option>
-                        <option value="Hari 6">Lancar Hari 6 (85)</option>
-                        <option value="Hari 7">Lancar Hari 7 (82)</option>
-                      </optgroup>
-                      <optgroup label="Indikator Huruf (Tugas)">
+                      <option value="Belum">-- Belum Ada Nilai --</option>
+                      <optgroup label="Indikator Huruf">
                         <option value="A">Nilai A (95)</option>
                         <option value="B">Nilai B (85)</option>
                         <option value="C">Nilai C (75)</option>
                         <option value="D">Nilai D (65)</option>
+                      </optgroup>
+                      <optgroup label="Indikator Kelancaran">
+                        <option value="Hari 1">Lancar Hari 1 (100)</option>
+                        <option value="Hari 2">Lancar Hari 2 (97)</option>
+                        <option value="Hari 3">Lancar Hari 3 (94)</option>
                       </optgroup>
                     </select>
                   </td>
@@ -139,15 +126,16 @@
           </div>
         </div>
 
-        <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
+        <div v-if="currentDisplayMode === 'all' || currentDisplayMode === '6-7'" class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
           <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center gap-2">
             <div>
               <h2 class="text-lg font-bold text-sky-400">🧑👩 Kelas 6 - 7</h2>
               <span class="text-xs bg-sky-900/50 text-sky-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredRight.length }} Anak</span>
             </div>
-            <button @click="markAllToday('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 rounded-lg shadow transition font-bold text-center">
-              ✅ Set Hapal Hari {{ selectedDay }}
-            </button>
+            <div class="flex gap-2">
+              <button @click="exportToPDF('right')" class="text-xs bg-[#0f172a] text-sky-400 hover:bg-sky-900 px-3 py-2 rounded-lg border border-sky-800/50 transition font-bold" title="Cetak Hari Ini">📄 PDF</button>
+              <button @click="markAllA('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 rounded-lg shadow transition font-bold">✅ Beri Nilai A</button>
+            </div>
           </div>
 
           <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
@@ -169,21 +157,17 @@
                   <td class="py-3 px-2 text-center"><span class="text-sky-400 font-bold bg-sky-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                   <td class="py-3 px-2">
                     <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-sky-500 focus:outline-none text-xs transition">
-                      <option value="Belum">-- Pilih Nilai --</option>
-                      <optgroup label="Sesuai Hari Setor (Hafalan)">
-                        <option value="Hari 1">Lancar Hari 1 (100)</option>
-                        <option value="Hari 2">Lancar Hari 2 (97)</option>
-                        <option value="Hari 3">Lancar Hari 3 (94)</option>
-                        <option value="Hari 4">Lancar Hari 4 (91)</option>
-                        <option value="Hari 5">Lancar Hari 5 (88)</option>
-                        <option value="Hari 6">Lancar Hari 6 (85)</option>
-                        <option value="Hari 7">Lancar Hari 7 (82)</option>
-                      </optgroup>
-                      <optgroup label="Indikator Huruf (Tugas)">
+                      <option value="Belum">-- Belum Ada Nilai --</option>
+                      <optgroup label="Indikator Huruf">
                         <option value="A">Nilai A (95)</option>
                         <option value="B">Nilai B (85)</option>
                         <option value="C">Nilai C (75)</option>
                         <option value="D">Nilai D (65)</option>
+                      </optgroup>
+                      <optgroup label="Indikator Kelancaran">
+                        <option value="Hari 1">Lancar Hari 1 (100)</option>
+                        <option value="Hari 2">Lancar Hari 2 (97)</option>
+                        <option value="Hari 3">Lancar Hari 3 (94)</option>
                       </optgroup>
                     </select>
                   </td>
@@ -211,6 +195,54 @@
       <p class="text-sm text-gray-500 mt-2 max-w-md">Pilih topik yang sudah ada atau buat topik baru di panel atas untuk mulai memasukkan nilai anak-anak.</p>
     </div>
 
+    <div v-if="showCreateModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[#151e32] border border-gray-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all">
+        <div class="p-6 border-b border-gray-800 bg-[#0f172a]">
+          <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><span>➕</span> Buat Topik Baru</h2>
+        </div>
+        <div class="p-6 space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Nama Topik:</label>
+            <input v-model="createForm.name" type="text" placeholder="Contoh: Tokoh Daud, Misi Paulus" class="w-full bg-[#0f172a] border border-gray-700 rounded-lg p-3 text-white focus:border-emerald-500 focus:outline-none font-bold" @keyup.enter="confirmCreateTopic">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Tampilkan Kelas Saat Memulai:</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label :class="createForm.target === 'all' ? 'bg-sky-600 border-sky-500 text-white' : 'bg-[#0f172a] border-gray-700 text-gray-400 hover:border-gray-500'" class="border rounded-lg p-2 text-center text-xs font-bold cursor-pointer transition">
+                <input type="radio" v-model="createForm.target" value="all" class="hidden"> Semua
+              </label>
+              <label :class="createForm.target === '3-5' ? 'bg-teal-600 border-teal-500 text-white' : 'bg-[#0f172a] border-gray-700 text-gray-400 hover:border-gray-500'" class="border rounded-lg p-2 text-center text-xs font-bold cursor-pointer transition">
+                <input type="radio" v-model="createForm.target" value="3-5" class="hidden"> Kelas 3-5
+              </label>
+              <label :class="createForm.target === '6-7' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-[#0f172a] border-gray-700 text-gray-400 hover:border-gray-500'" class="border rounded-lg p-2 text-center text-xs font-bold cursor-pointer transition">
+                <input type="radio" v-model="createForm.target" value="6-7" class="hidden"> Kelas 6-7
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 bg-[#0b1121] flex justify-end gap-3 border-t border-gray-800">
+          <button @click="showCreateModal = false" class="px-4 py-2 rounded-lg bg-transparent text-gray-400 hover:text-white font-medium transition">Batal</button>
+          <button @click="confirmCreateTopic" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-900/50 transition">Buat & Buka</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showEditModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[#151e32] border border-gray-700 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-all">
+        <div class="p-6 border-b border-gray-800 bg-[#0f172a]">
+          <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2"><span>✏️</span> Ubah Nama Topik</h2>
+        </div>
+        <div class="p-6">
+          <label class="block text-sm font-medium text-gray-400 mb-2">Nama Baru:</label>
+          <input v-model="editForm.newName" type="text" class="w-full bg-[#0f172a] border border-gray-700 rounded-lg p-3 text-white focus:border-amber-500 focus:outline-none font-bold" @keyup.enter="confirmEditTopic">
+        </div>
+        <div class="p-4 bg-[#0b1121] flex justify-end gap-3 border-t border-gray-800">
+          <button @click="showEditModal = false" class="px-4 py-2 rounded-lg bg-transparent text-gray-400 hover:text-white font-medium transition">Batal</button>
+          <button @click="confirmEditTopic" class="px-5 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-lg shadow-amber-900/50 transition">Simpan Perubahan</button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="toastMsg" class="fixed bottom-6 right-6 bg-sky-500 text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform transition-all z-50 font-bold">
       <span>{{ toastIcon }}</span> {{ toastMsg }}
     </div>
@@ -225,7 +257,11 @@ import autoTable from 'jspdf-autotable'
 
 const selectedDay = ref(1)
 const selectedMode = ref('')
-const newTopicName = ref('')
+const currentDisplayMode = ref('all') 
+const showCreateModal = ref(false)
+const createForm = ref({ name: '', target: 'all' })
+const showEditModal = ref(false)
+const editForm = ref({ newName: '' })
 
 const availableTopics = ref([])
 const activeTopic = ref('')
@@ -262,7 +298,6 @@ const getPoint = (grade) => {
 
 const loadExistingTopics = async () => {
   const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan')
-
   if (hafalan) {
     const uniqueTopics = [...new Set(hafalan.map(h => h.jenis_hafalan))]
     const excludedTopics = ['Titah', 'Hata Haporseaon', 'Doa Bapa Kami']
@@ -272,40 +307,52 @@ const loadExistingTopics = async () => {
 
 onMounted(() => loadExistingTopics())
 
-const loadPenilaianData = async () => {
-  let topicToLoad = ''
-  if (selectedMode.value === 'BARU') {
-    if (!newTopicName.value.trim()) return alert("Nama topik baru tidak boleh kosong!")
-    
-    const forbidden = ['titah', 'hata haporseaon', 'doa bapa kami']
-    if (forbidden.includes(newTopicName.value.trim().toLowerCase())) {
-      return alert("Nama topik dilarang! Topik ini sudah dipakai oleh sistem utama.")
-    }
-    
-    topicToLoad = newTopicName.value.trim()
-  } else if (selectedMode.value !== '') {
-    topicToLoad = selectedMode.value
-  } else {
-    return alert("Silakan pilih topik atau buat topik baru terlebih dahulu!")
+const openCreateModal = () => {
+  createForm.value = { name: '', target: 'all' }
+  showCreateModal.value = true
+}
+
+const confirmCreateTopic = () => {
+  const tName = createForm.value.name.trim()
+  if (!tName) return alert("Nama topik tidak boleh kosong!")
+  
+  const forbidden = ['titah', 'hata haporseaon', 'doa bapa kami']
+  if (forbidden.includes(tName.toLowerCase())) {
+    return alert("Nama dilarang! Topik ini sudah dipakai oleh sistem utama.")
   }
 
-  activeTopic.value = topicToLoad
+  activeTopic.value = tName
+  currentDisplayMode.value = createForm.value.target
+  
+  if (!availableTopics.value.includes(tName)) {
+    availableTopics.value.push(tName)
+  }
+  
+  selectedMode.value = tName
+  showCreateModal.value = false
+  loadPenilaianData(true) 
+}
+
+const loadPenilaianData = async (isNew = false) => {
+  const isCalledFromModalOrDayChange = isNew === true;
+
+  if (!isCalledFromModalOrDayChange) {
+    if (selectedMode.value === '') return alert("Silakan pilih topik terlebih dahulu dari dropdown!")
+    activeTopic.value = selectedMode.value
+    currentDisplayMode.value = 'all' 
+  }
+
   pageLeft.value = 1
   pageRight.value = 1
 
-  if (selectedMode.value === 'BARU' && !availableTopics.value.includes(topicToLoad)) {
-    availableTopics.value.push(topicToLoad)
-    selectedMode.value = topicToLoad 
-    newTopicName.value = ''
-  }
-
   const { data: students } = await supabase.from('students').select('*').order('kelas', { ascending: true })
   
+  // PERBAIKAN UTAMA 1: Ubah selectedDay.value ke Number()
   const { data: hafalan } = await supabase
     .from('hafalan')
     .select('*')
     .eq('jenis_hafalan', activeTopic.value)
-    .eq('hari', selectedDay.value)
+    .eq('hari', Number(selectedDay.value))
 
   if (students) {
     allStudents.value = students.map(s => {
@@ -320,25 +367,51 @@ const loadPenilaianData = async () => {
 }
 
 const handleDayChange = () => {
-  if (activeTopic.value) loadPenilaianData()
+  if (activeTopic.value) loadPenilaianData(true)
 }
 
-// === FITUR HAPUS TOPIK ===
+const openEditModal = () => {
+  if (!activeTopic.value) return
+  editForm.value.newName = activeTopic.value
+  showEditModal.value = true
+}
+
+const confirmEditTopic = async () => {
+  const newName = editForm.value.newName.trim()
+  
+  if (!newName) return alert("Nama tidak boleh kosong!")
+  if (newName === activeTopic.value) {
+    showEditModal.value = false
+    return
+  }
+  
+  const forbidden = ['titah', 'hata haporseaon', 'doa bapa kami']
+  if (forbidden.includes(newName.toLowerCase())) {
+    return alert("Gagal mengubah nama! Nama tersebut dilarang karena dipakai sistem utama.")
+  }
+
+  const { error } = await supabase.from('hafalan').update({ jenis_hafalan: newName }).eq('jenis_hafalan', activeTopic.value)
+
+  if (error) return alert("Terjadi kesalahan di database: " + error.message)
+
+  const index = availableTopics.value.indexOf(activeTopic.value)
+  if (index !== -1) availableTopics.value[index] = newName
+  
+  activeTopic.value = newName
+  selectedMode.value = newName
+  showEditModal.value = false
+  
+  showToast(`Nama berhasil diubah!`, '✏️')
+}
+
 const deleteTopic = async () => {
   if (!activeTopic.value) return
-  
-  const confirmDelete = confirm(`⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus topik "${activeTopic.value}"?\nSeluruh data nilai anak-anak di topik ini (dari Hari 1 sampai 7) akan hilang permanen!`)
+  const confirmDelete = confirm(`⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus topik "${activeTopic.value}"?\nSeluruh data nilai anak-anak di topik ini akan hilang permanen!`)
   
   if (confirmDelete) {
-    // Hapus dari database Supabase
     const { error } = await supabase.from('hafalan').delete().eq('jenis_hafalan', activeTopic.value)
-    
-    if (error) {
-      alert("Gagal menghapus topik: " + error.message)
-      return
-    }
+    if (error) return alert("Gagal menghapus: " + error.message)
 
-    // Update UI
     availableTopics.value = availableTopics.value.filter(t => t !== activeTopic.value)
     activeTopic.value = ''
     selectedMode.value = ''
@@ -360,15 +433,22 @@ const paginatedRight = computed(() => {
   return filteredRight.value.slice(start, start + itemsPerPage)
 })
 
+// PERBAIKAN UTAMA 2: Fungsi Hapus Jika Dipilih "Belum"
 const saveHafalan = async (student, isSilent = false) => {
-  if (student.status_nilai === 'Belum') return
+  if (student.status_nilai === 'Belum') {
+    if (student.hafalan_id) {
+      await supabase.from('hafalan').delete().eq('id', student.hafalan_id)
+      student.hafalan_id = null
+    }
+    if (!isSilent) showToast(`Data dihapus: ${student.nama_lengkap}`, '🗑️')
+    return
+  }
 
   const skor = getPoint(student.status_nilai)
-  
   const payload = { 
     student_id: student.id, 
     jenis_hafalan: activeTopic.value, 
-    hari: selectedDay.value,        
+    hari: Number(selectedDay.value), // Pastikan format Angka     
     status_nilai: student.status_nilai, 
     skor: skor 
   }
@@ -383,20 +463,19 @@ const saveHafalan = async (student, isSilent = false) => {
   if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (${skor} pt)`)
 }
 
-const markAllToday = async (section) => {
-  const targetGrade = `Hari ${selectedDay.value}`
+// PERBAIKAN UTAMA 3: Ganti Tombol Jadi "Beri Nilai A"
+const markAllA = async (section) => {
   const listToUpdate = section === 'left' ? filteredLeft.value : filteredRight.value
   
   for (let student of listToUpdate) {
-    if (student.status_nilai !== targetGrade) {
-      student.status_nilai = targetGrade
+    if (student.status_nilai !== 'A') {
+      student.status_nilai = 'A'
       await saveHafalan(student, true)
     }
   }
-  showToast(`Semua anak otomatis ditandai Lancar Hari ${selectedDay.value}!`)
+  showToast(`Semua anak diberi Nilai A!`, '✅')
 }
 
-// === CETAK PDF PER HARI ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF()
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -422,32 +501,17 @@ const exportToPDF = (mode) => {
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: mode === 'left' ? [20, 184, 166] : [14, 165, 233] }, 
-    columnStyles: {
-      0: { halign: 'center' },
-      2: { halign: 'center' },
-      3: { halign: 'center' },
-      4: { halign: 'center', fontStyle: 'bold' }
-    }
+    columnStyles: { 0: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center', fontStyle: 'bold' } }
   })
-  
   window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 
-// === CETAK PDF REKAP 7 HARI ===
 const export7DaysPDF = async (mode) => {
   const doc = new jsPDF()
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
-  // Ambil semua data dari hari 1-7 khusus topik ini
-  const { data: allHafalan, error } = await supabase
-    .from('hafalan')
-    .select('*')
-    .eq('jenis_hafalan', activeTopic.value)
-
-  if (error) {
-    alert("Gagal mengambil rekap data!")
-    return
-  }
+  const { data: allHafalan, error } = await supabase.from('hafalan').select('*').eq('jenis_hafalan', activeTopic.value)
+  if (error) return alert("Gagal mengambil rekap data!")
 
   doc.setFontSize(16)
   doc.text(`Rekap 7 Hari Penilaian: ${activeTopic.value}`, 14, 15)
@@ -460,11 +524,8 @@ const export7DaysPDF = async (mode) => {
   doc.text(`Kategori: ${labelKelas} | Seluruh Hari Kegiatan`, 14, 22)
   doc.text(`Dicetak pada: ${tanggal}`, 14, 27)
   
-  // Mapping matrix data untuk 7 hari
   const bodyData = targetData.map((student, idx) => {
     let row = [idx + 1, student.nama_lengkap, `Kls ${student.kelas}`]
-    
-    // Looping mencari skor hari ke 1 sampai 7
     for(let d = 1; d <= 7; d++) {
       let record = allHafalan.find(h => h.student_id === student.id && h.hari === d)
       row.push(record ? record.skor : '-')
@@ -478,15 +539,8 @@ const export7DaysPDF = async (mode) => {
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: mode === 'left' ? [20, 184, 166] : [14, 165, 233] }, 
-    columnStyles: {
-      0: { halign: 'center' },
-      2: { halign: 'center' },
-      3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
-      6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
-      9: { halign: 'center' }
-    }
+    columnStyles: { 0: { halign: 'center' }, 2: { halign: 'center' }, 3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' }, 6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' }, 9: { halign: 'center' } }
   })
-  
   window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 </script>
