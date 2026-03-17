@@ -13,7 +13,7 @@ import KelolaASM from "../views/KelolaASM.vue";
 import Tugas from "../views/Tugas.vue";
 
 // Import Komponen Khusus Bang Samuel
-import WaliKelas67 from "../views/WaliKelas67.vue"; 
+// import WaliKelas67 from "../views/WaliKelas67.vue"; // <-- DIMATIKAN SEMENTARA
 import AbsensiSamuel from '../views/AbsensiSamuel.vue';
 import PenilaianSamuel from '../views/PenilaianSamuel.vue';
 
@@ -77,12 +77,14 @@ const routes = [
     component: AbsensiSamuel,
     meta: { requiresAuth: true },
   },
+  /* DIMATIKAN SEMENTARA AGAR VERCEL BISA DEPLOY
   {
     path: "/tugas-besar",
     name: "WaliKelas67",
     component: WaliKelas67,
     meta: { requiresAuth: true },
   },
+  */
   {
     path: "/penilaian-samuel",
     name: "PenilaianSamuel",
@@ -110,15 +112,12 @@ router.beforeEach(async (to, from, next) => {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Jika halaman butuh login TAPI user belum login -> Lempar ke Login
   if (to.meta.requiresAuth && !session) {
     next({ name: "Login" });
   } 
-  // Jika user SUDAH login TAPI mencoba akses halaman Login atau Landing Page -> Lempar ke Dashboard
   else if ((to.name === "Login" || to.name === "LandingPage") && session) {
     next({ name: "Dashboard" });
   } 
-  // Sisanya aman, izinkan masuk
   else {
     next();
   }
