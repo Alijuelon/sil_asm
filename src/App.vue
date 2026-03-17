@@ -23,9 +23,7 @@
             <p class="text-[10px] text-teal-400 font-bold tracking-wider">Sekolah Injil Libur</p>
           </div>
         </div>
-        <button @click="isSidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white">
-          ✖
-        </button>
+        <button @click="isSidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white">✖</button>
       </div>
 
       <nav class="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
@@ -56,7 +54,7 @@
           </router-link>
         </div>
 
-        <div v-if="currentUserEmail === 'samuelMT@gmail.com'" class="bg-sky-900/10 border border-sky-900/30 rounded-xl p-2 shadow-sm">
+        <div v-if="currentUserEmail === 'samuelmt@gmail.com'" class="bg-sky-900/10 border border-sky-900/30 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-sky-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 6-7</div>
           <router-link @click="isSidebarOpen = false" to="/absensi-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
             <span class="text-lg">📋</span> Absensi (6-7)
@@ -94,7 +92,7 @@
         
         <div class="flex items-center gap-3 md:gap-6 shrink-0 ml-4">
           <div class="flex items-center gap-2 md:gap-3 border-l border-gray-700 pl-4 md:pl-6">
-            <div :class="currentUserEmail === 'samuelMT@gmail.com' ? 'bg-sky-600' : 'bg-teal-600'" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+            <div :class="currentUserEmail === 'samuelmt@gmail.com' ? 'bg-sky-600' : 'bg-teal-600'" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
               {{ profileInitials }}
             </div>
             <span class="text-sm font-medium text-gray-200 hidden sm:block">{{ profileName }}</span>
@@ -123,8 +121,9 @@
 
   </div>
 </template>
+
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from './supabase'
 
@@ -135,56 +134,47 @@ const isSidebarOpen = ref(false)
 const showLogoutModal = ref(false)
 const currentUserEmail = ref('')
 
-// Deteksi rute publik (Login/Landing)
+// Cek rute publik (Login / Landing Page)
 const isPublicRoute = computed(() => {
   return ['Login', 'LandingPage'].includes(route.name)
 })
 
-// === LOGIKA NAMA PROFIL DINAMIS DARI EMAIL ===
+// === LOGIKA NAMA & INISIAL DINAMIS ===
 const profileName = computed(() => {
-  if (!currentUserEmail.value) return 'Admin'
-  
-  // Ambil teks sebelum tanda '@' (contoh: samuelMT@gmail.com -> samuelMT)
+  if (!currentUserEmail.value) return 'Memuat...'
   const namePart = currentUserEmail.value.split('@')[0]
-  
-  // (Opsional) Huruf kapital di awal kata
   return namePart.charAt(0).toUpperCase() + namePart.slice(1)
 })
 
-// === LOGIKA INISIAL DINAMIS ===
 const profileInitials = computed(() => {
-  if (!currentUserEmail.value) return 'AD'
-  
+  if (!currentUserEmail.value) return '...'
   const namePart = currentUserEmail.value.split('@')[0]
-  
-  // Ambil maksimal 2 huruf pertama, jadikan huruf besar (contoh: samuelMT -> SA)
   return namePart.substring(0, 2).toUpperCase()
 })
 
-// Mengecek siapa yang sedang login saat aplikasi dibuka
-const checkUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    currentUserEmail.value = user.email
-  } else {
-    currentUserEmail.value = ''
-  }
-}
-
+// === KUNCI PERBAIKAN: onAuthStateChange ===
 onMounted(() => {
-  checkUser()
+  // 1. Cek sesi saat halaman pertama kali direfresh
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session?.user) {
+      // Pastikan selalu huruf kecil agar pengecekan v-if tidak gagal
+      currentUserEmail.value = data.session.user.email.toLowerCase() 
+    }
+  })
+
+  // 2. Pantau perubahan status (Saat baru klik tombol Login)
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      currentUserEmail.value = session.user.email.toLowerCase()
+    } else {
+      currentUserEmail.value = ''
+    }
+  })
 })
 
-// Memantau perubahan rute (Agar kalau baru login, emailnya langsung ter-update)
-watch(route, () => {
-  checkUser()
-})
-
-// Fungsi Logout
 const handleLogout = async () => {
   showLogoutModal.value = false 
   await supabase.auth.signOut() 
-  currentUserEmail.value = '' 
   router.push('/login') 
 }
 </script>
