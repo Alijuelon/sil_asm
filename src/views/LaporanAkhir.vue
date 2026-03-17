@@ -3,20 +3,20 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-white">Laporan Akhir SIL HKBP 2026</h1>
-        <p class="text-sm text-gray-400 mt-1">Rekapitulasi 8 Kategori Nilai Sesuai Format Resmi Panitia</p>
+        <p class="text-sm text-gray-400 mt-1">Rekapitulasi Cerdas Terintegrasi (Kelas 3-5 & Kelas 6-7)</p>
       </div>
     </div>
 
     <div class="bg-[#151e32] border border-gray-800 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-        <label class="font-medium text-gray-400 text-sm">Filter Kelas:</label>
+        <label class="font-medium text-gray-400 text-sm">Filter Kategori:</label>
         <select 
           v-model="filterCategory" 
-          class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition text-sm"
+          class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition text-sm font-bold"
         >
           <option value="all">Semua Kelas (3 - 7)</option>
-          <option value="3-5">Kelas 3 - 5</option>
-          <option value="6-7">Kelas 6 - 7</option>
+          <option value="3-5">Kelas 3 - 5 (Fasilitator: Ali)</option>
+          <option value="6-7">Kelas 6 - 7 (Fasilitator: Samuel)</option>
         </select>
         <button @click="fetchAggregatedData" class="w-full sm:w-auto bg-[#0f172a] border border-gray-700 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg transition shadow-lg text-sm font-medium flex items-center justify-center gap-2">
           <span>🔄</span> Segarkan Data
@@ -36,14 +36,21 @@
               <th class="p-3 font-semibold rounded-tl-lg border-r border-gray-800">No</th>
               <th class="p-3 font-semibold border-r border-gray-800">Nama Lengkap</th>
               <th class="p-3 font-semibold text-center border-r border-gray-800">Kelas</th>
+              
               <th class="p-3 font-semibold text-center text-blue-300">Rerata<br>Hadir</th>
               <th class="p-3 font-semibold text-center text-teal-300">Rerata<br>Tugas</th>
               <th class="p-3 font-semibold text-center text-teal-300">Rerata<br>Bacaan</th>
               <th class="p-3 font-semibold text-center text-teal-300">Rerata<br>Kuis</th>
               <th class="p-3 font-semibold text-center text-teal-300 border-r border-gray-800">Rerata<br>Tontonan</th>
-              <th class="p-3 font-semibold text-center text-sky-300">Doa Bapa<br>Kami</th>
-              <th class="p-3 font-semibold text-center text-sky-300">Iman<br>Rasuli</th>
-              <th class="p-3 font-semibold text-center text-sky-300 border-r border-gray-800">Titah</th>
+              
+              <th v-if="filterCategory !== '6-7'" class="p-3 font-semibold text-center text-sky-300">Doa Bapa<br>Kami</th>
+              <th v-if="filterCategory !== '6-7'" class="p-3 font-semibold text-center text-sky-300">Iman<br>Rasuli</th>
+              <th class="p-3 font-semibold text-center text-sky-300 border-r border-gray-800">
+                <span v-if="filterCategory === '6-7'">Rerata Topik<br>Kustom (Samuel)</span>
+                <span v-else-if="filterCategory === 'all'">Titah /<br>Topik Kustom</span>
+                <span v-else>Titah</span>
+              </th>
+              
               <th class="p-3 font-bold text-white text-center rounded-tr-lg bg-teal-600">NILAI<br>AKHIR</th>
             </tr>
           </thead>
@@ -54,18 +61,21 @@
             <tr v-for="(student, index) in filteredStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
               <td class="p-3 text-gray-500 border-r border-gray-800/50">{{ index + 1 }}</td>
               <td class="p-3 text-gray-200 font-medium border-r border-gray-800/50">{{ student.nama_lengkap }}</td>
-              <td class="p-3 text-center border-r border-gray-800/50"><span class="bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-xs">Kls {{ student.kelas }}</span></td>
+              <td class="p-3 text-center border-r border-gray-800/50">
+                <span :class="student.kelas <= 5 ? 'bg-teal-900/50 text-teal-300' : 'bg-sky-900/50 text-sky-300'" class="px-2 py-1 rounded text-xs">
+                  Kls {{ student.kelas }}
+                </span>
+              </td>
               
               <td class="p-3 text-center font-bold text-blue-400 bg-blue-900/10">{{ student.rerata_hadir }}</td>
-              
               <td class="p-3 text-center text-teal-400 bg-teal-900/10">{{ student.rerata_tugas }}</td>
               <td class="p-3 text-center text-teal-400 bg-teal-900/10">{{ student.rerata_bacaan }}</td>
               <td class="p-3 text-center text-teal-400 bg-teal-900/10">{{ student.rerata_kuis }}</td>
               <td class="p-3 text-center text-teal-400 bg-teal-900/10 border-r border-gray-800/50">{{ student.rerata_tontonan }}</td>
               
-              <td class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_doa }}</td>
-              <td class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_haporseaon }}</td>
-              <td class="p-3 text-center text-sky-400 bg-sky-900/10 border-r border-gray-800/50">{{ student.skor_titah }}</td>
+              <td v-if="filterCategory !== '6-7'" class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_doa }}</td>
+              <td v-if="filterCategory !== '6-7'" class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_haporseaon }}</td>
+              <td class="p-3 text-center font-bold text-sky-400 bg-sky-900/10 border-r border-gray-800/50">{{ student.skor_titah }}</td>
               
               <td class="p-3 text-center font-black text-white bg-teal-600/80 text-base shadow-inner">{{ student.nilai_akhir }}</td>
             </tr>
@@ -85,7 +95,7 @@ import autoTable from 'jspdf-autotable'
 const filterCategory = ref('all')
 const aggregatedStudents = ref([])
 
-// Helper: Konversi Nilai Huruf ke Angka untuk Tugas Harian
+// Helper: Konversi Huruf ke Angka
 const getPoint = (grade) => {
   if (grade === 'A') return 95
   if (grade === 'B') return 85
@@ -103,13 +113,13 @@ const fetchAggregatedData = async () => {
   if (students) {
     aggregatedStudents.value = students.map(student => {
       
-      // 1. HITUNG RERATA ABSENSI (Dibagi 7 Hari)
+      // 1. RERATA ABSENSI (Dibagi 7 Hari)
       const studentAttendance = attendance?.filter(a => a.student_id === student.id) || []
       let totalAbsen = 0
       studentAttendance.forEach(a => totalAbsen += a.skor)
       const rerataHadir = Math.round(totalAbsen / 7) 
 
-      // 2. HITUNG RERATA 4 TUGAS HARIAN (Dibagi 7 Hari)
+      // 2. RERATA TUGAS HARIAN (Dibagi 7 Hari)
       const studentTugas = tugas?.filter(t => t.student_id === student.id) || []
       let sTugas = 0, sBacaan = 0, sKuis = 0, sTontonan = 0
       
@@ -125,19 +135,49 @@ const fetchAggregatedData = async () => {
       const rerataKuis = Math.round(sKuis / 7)
       const rerataTontonan = Math.round(sTontonan / 7)
 
-      // 3. AMBIL SKOR 3 HAFALAN
+      // 3. LOGIKA KELAS KECIL (Ali) VS KELAS BESAR (Samuel)
       const studentHafalan = hafalan?.filter(h => h.student_id === student.id) || []
-      const doa = studentHafalan.find(h => h.jenis_hafalan === 'Doa Bapa Kami')
-      const haporseaon = studentHafalan.find(h => h.jenis_hafalan === 'Hata Haporseaon')
-      const titah = studentHafalan.find(h => h.jenis_hafalan === 'Titah')
-      
-      const skorDoa = doa ? doa.skor : 0
-      const skorHaporseaon = haporseaon ? haporseaon.skor : 0
-      const skorTitah = titah ? titah.skor : 0
+      let skorDoa = 0, skorHaporseaon = 0, skorTitah = 0, nilaiAkhir = 0
 
-      // 4. HITUNG NILAI AKHIR (Rata-rata dari 8 Komponen)
-      const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + skorDoa + skorHaporseaon + skorTitah
-      const nilaiAkhir = Math.round(totalSemua / 8)
+      if (student.kelas <= 5) {
+        // --- LOGIKA KAK ALI (Hafalan Fix) ---
+        const doa = studentHafalan.find(h => h.jenis_hafalan === 'Doa Bapa Kami')
+        const haporseaon = studentHafalan.find(h => h.jenis_hafalan === 'Hata Haporseaon')
+        const titah = studentHafalan.find(h => h.jenis_hafalan === 'Titah')
+        
+        skorDoa = doa ? doa.skor : 0
+        skorHaporseaon = haporseaon ? haporseaon.skor : 0
+        skorTitah = titah ? titah.skor : 0
+
+        // Total 8 Komponen (1 Absen + 4 Tugas + 3 Hafalan)
+        const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + skorDoa + skorHaporseaon + skorTitah
+        nilaiAkhir = Math.round(totalSemua / 8)
+
+      } else {
+        // --- LOGIKA BANG SAMUEL (Topik Kustom Dinamis) ---
+        // Saring hanya topik kustom (abaikan nama topik fix jika ada yang bocor)
+        const hafalanSamuel = studentHafalan.filter(h => !['Doa Bapa Kami', 'Hata Haporseaon', 'Titah'].includes(h.jenis_hafalan))
+        
+        let totalSkorSamuel = 0
+        let uniqueTopics = new Set()
+        
+        hafalanSamuel.forEach(h => {
+          totalSkorSamuel += h.skor
+          uniqueTopics.add(h.jenis_hafalan)
+        })
+        
+        // Cari rata-rata per topik selama 7 hari
+        const jumlahTopik = uniqueTopics.size > 0 ? uniqueTopics.size : 1
+        const rerataCustom = Math.round((totalSkorSamuel / 7) / jumlahTopik)
+
+        skorDoa = '-'
+        skorHaporseaon = '-'
+        skorTitah = rerataCustom // Kita taruh Rerata Topik Kustom di kolom ini untuk menghemat ruang tabel
+
+        // Karena Samuel menggunakan 1 "Rerata Custom", kita kalikan 3 agar bobotnya sama adilnya dengan 3 Hafalan Kak Ali (Total tetap 8 komponen)
+        const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + (rerataCustom * 3)
+        nilaiAkhir = Math.round(totalSemua / 8)
+      }
 
       return {
         ...student,
@@ -155,9 +195,7 @@ const fetchAggregatedData = async () => {
   }
 }
 
-onMounted(() => {
-  fetchAggregatedData()
-})
+onMounted(() => { fetchAggregatedData() })
 
 const filteredStudents = computed(() => {
   if (filterCategory.value === '3-5') {
@@ -168,14 +206,10 @@ const filteredStudents = computed(() => {
   return aggregatedStudents.value
 })
 
-// === FUNGSI EXPORT PDF FINAL (LANDSCAPE UNTUK 12 KOLOM) ===
+// === EXPORT PDF CERDAS ===
 const exportToPDF = () => {
-  // Menggunakan orientasi 'landscape' agar semua kolom muat
   const doc = new jsPDF('landscape')
-  
-  const tanggalSekarang = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  })
+  const tanggalSekarang = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
   doc.setFontSize(16)
   doc.setTextColor(0, 0, 0)
@@ -186,47 +220,48 @@ const exportToPDF = () => {
   let textFilter = filterCategory.value === 'all' ? 'Semua Kelas (3-7)' : `Kategori: Kelas ${filterCategory.value}`
   doc.text(`${textFilter} | Dicetak: ${tanggalSekarang}`, 14, 22)
   
-  // Mapping data untuk PDF
-  const bodyData = filteredStudents.value.map((s, idx) => [
-    idx + 1, 
-    s.nama_lengkap, 
-    `Kls ${s.kelas}`, 
-    s.rerata_hadir.toString(),
-    s.rerata_tugas.toString(),
-    s.rerata_bacaan.toString(),
-    s.rerata_kuis.toString(),
-    s.rerata_tontonan.toString(),
-    s.skor_doa.toString(),
-    s.skor_haporseaon.toString(),
-    s.skor_titah.toString(),
-    s.nilai_akhir.toString()
-  ])
+  // Penyesuaian Kolom Header & Body berdasarkan Filter
+  let headTabel = []
+  let bodyData = []
+
+  if (filterCategory.value === '6-7') {
+    // Mode Samuel: Sembunyikan Doa & Haporseaon, ubah Titah jadi Topik Kustom
+    headTabel = [['No', 'Nama Anak', 'Kelas', 'Kehadiran', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Rerata Topik Kustom', 'NILAI AKHIR']]
+    bodyData = filteredStudents.value.map((s, idx) => [
+      idx + 1, s.nama_lengkap, `Kls ${s.kelas}`, s.rerata_hadir.toString(), s.rerata_tugas.toString(), s.rerata_bacaan.toString(), s.rerata_kuis.toString(), s.rerata_tontonan.toString(), s.skor_titah.toString(), s.nilai_akhir.toString()
+    ])
+  } else {
+    // Mode Ali / Mode Semua
+    const labelHafalan3 = filterCategory.value === 'all' ? 'Titah / Kustom' : 'Titah'
+    headTabel = [['No', 'Nama Anak', 'Kelas', 'Kehadiran', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Doa Bapa Kami', 'Iman Rasuli', labelHafalan3, 'NILAI AKHIR']]
+    bodyData = filteredStudents.value.map((s, idx) => [
+      idx + 1, s.nama_lengkap, `Kls ${s.kelas}`, s.rerata_hadir.toString(), s.rerata_tugas.toString(), s.rerata_bacaan.toString(), s.rerata_kuis.toString(), s.rerata_tontonan.toString(), s.skor_doa.toString(), s.skor_haporseaon.toString(), s.skor_titah.toString(), s.nilai_akhir.toString()
+    ])
+  }
   
   autoTable(doc, {
     startY: 28,
-    head: [['No', 'Nama Anak', 'Kelas', 'Kehadiran', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Doa Bapa Kami', 'Iman Rasuli', 'Titah', 'NILAI AKHIR']],
+    head: headTabel,
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: [15, 23, 42], halign: 'center', fontSize: 9 },
     bodyStyles: { fontSize: 8 },
     columnStyles: {
       0: { halign: 'center', cellWidth: 10 },
-      1: { cellWidth: 40 }, // Nama butuh ruang ekstra
+      1: { cellWidth: 40 },
       2: { halign: 'center', cellWidth: 15 },
-      // Set semua kolom nilai ke rata tengah
+      // Rata tengah untuk semua kolom angka
       3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
       6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
-      9: { halign: 'center' }, 10: { halign: 'center' },
-      11: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } // Highlight Nilai Akhir
+      9: { halign: 'center' }, 10: { halign: 'center' }, 11: { halign: 'center' },
+      [headTabel[0].length - 1]: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } // Highlight Nilai Akhir
     }
   })
   
   const formatTanggalFile = new Date().toISOString().split('T')[0] 
   const fileName = `Rekap_Penilaian_SIL_${filterCategory.value}_${formatTanggalFile}`
   
-  const pdfBlob = doc.output('blob')
-  const pdfUrl = URL.createObjectURL(pdfBlob)
-  window.open(pdfUrl, '_blank')
+  window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 </script>
 
