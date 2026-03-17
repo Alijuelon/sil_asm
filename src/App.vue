@@ -59,8 +59,8 @@
           <router-link @click="isSidebarOpen = false" to="/absensi-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
             <span class="text-lg">📋</span> Absensi (6-7)
           </router-link>
-          <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">📘</span> Wali Kelas Review
+         <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">📘</span> Wali Kelas (Samuel)
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/penilaian-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
             <span class="text-lg">⭐</span> Penilaian
