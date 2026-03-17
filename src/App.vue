@@ -32,7 +32,7 @@
         
         <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-gray-500 uppercase px-3 mb-2 mt-1 tracking-wider">Menu Utama</div>
-          <router-link @click="isSidebarOpen = false" to="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
+          <router-link @click="isSidebarOpen = false" to="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">🏠</span> Dashboard
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/kelola-asm" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
@@ -90,17 +90,14 @@
           <button @click="isSidebarOpen = true" class="lg:hidden text-gray-300 hover:text-white focus:outline-none">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           </button>
-
-          <div class="hidden sm:flex items-center bg-[#0f172a] rounded-full px-4 py-2 w-full max-w-xs border border-gray-700 focus-within:border-teal-500">
-            <span class="text-gray-500">🔍</span>
-            <input type="text" placeholder="Cari data..." class="bg-transparent border-none outline-none text-sm text-gray-300 ml-2 w-full placeholder-gray-600">
-          </div>
         </div>
         
         <div class="flex items-center gap-3 md:gap-6 shrink-0 ml-4">
           <div class="flex items-center gap-2 md:gap-3 border-l border-gray-700 pl-4 md:pl-6">
-            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">AS</div>
-            <span class="text-sm font-medium text-gray-200 hidden sm:block">Ali Sinaga</span>
+            <div :class="currentUserEmail === 'samuelMT@gmail.com' ? 'bg-sky-600' : 'bg-teal-600'" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+              {{ profileInitials }}
+            </div>
+            <span class="text-sm font-medium text-gray-200 hidden sm:block">{{ profileName }}</span>
           </div>
         </div>
       </header>
@@ -116,7 +113,7 @@
           <span class="text-3xl">⚠️</span>
         </div>
         <h2 class="text-xl font-bold text-white mb-2">Yakin ingin keluar?</h2>
-        <p class="text-gray-400 text-sm mb-6">Anda harus login kembali untuk mengakses data absensi dan penilaian SIL.</p>
+        <p class="text-gray-400 text-sm mb-6">Sesi Anda akan diakhiri dan harus login kembali.</p>
         <div class="flex gap-3 w-full">
           <button @click="showLogoutModal = false" class="flex-1 px-4 py-2.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 text-white font-medium transition">Batal</button>
           <button @click="handleLogout" class="flex-1 px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition shadow-lg shadow-red-600/30">Ya, Keluar</button>
@@ -128,13 +125,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from './supabase'
 
 const router = useRouter()
+const route = useRoute()
+
+// Variabel Utama yang sebelumnya hilang
 const isSidebarOpen = ref(false)
-const currentUserEmail = ref('') // Menyimpan email yang sedang login
+const showLogoutModal = ref(false)
+const currentUserEmail = ref('')
+
+// Deteksi apakah rute ini adalah halaman Login/Landing Page
+const isPublicRoute = computed(() => {
+  return ['Login', 'LandingPage'].includes(route.name)
+})
+
+// Dinamis: Menentukan Nama dan Inisial di Header
+const profileName = computed(() => {
+  if (currentUserEmail.value === 'samuelMT@gmail.com') return 'Samuel MT'
+  if (currentUserEmail.value === 'alijuelonsinaga01@gmail.com') return 'Ali Sinaga'
+  return 'Admin'
+})
+
+const profileInitials = computed(() => {
+  if (currentUserEmail.value === 'samuelMT@gmail.com') return 'SM'
+  if (currentUserEmail.value === 'alijuelonsinaga01@gmail.com') return 'AS'
+  return 'AD'
+})
 
 // Mengecek siapa yang sedang login saat aplikasi dibuka
 onMounted(async () => {
@@ -144,9 +163,12 @@ onMounted(async () => {
   }
 })
 
+// Fungsi Logout
 const handleLogout = async () => {
-  await supabase.auth.signOut()
-  router.push('/login')
+  showLogoutModal.value = false // Tutup modal dulu
+  await supabase.auth.signOut() // Proses logout di Supabase
+  currentUserEmail.value = '' 
+  router.push('/login') // Lempar ke halaman login
 }
 </script>
 
