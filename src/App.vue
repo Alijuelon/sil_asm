@@ -41,7 +41,7 @@
         <div v-if="currentUserEmail === 'alijuelonsinaga01@gmail.com'" class="bg-teal-900/10 border border-teal-900/30 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-teal-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 3-5</div>
           <router-link @click="isSidebarOpen = false" to="/absensi" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
-            <span class="text-lg">📋</span> Absensi (3-5)
+            <span class="text-lg">📋</span> Absensi Kelas (3-5)
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/tugas" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">📗</span> Wali Kelas Review
@@ -57,7 +57,7 @@
         <div v-if="currentUserEmail === 'samuelmt@gmail.com'" class="bg-sky-900/10 border border-sky-900/30 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-sky-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 6-7</div>
           <router-link @click="isSidebarOpen = false" to="/absensi-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">📋</span> Absensi (6-7)
+            <span class="text-lg">📋</span> Absensi Kelas (6-7)
           </router-link>
          <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
             <span class="text-lg">📘</span> Wali Kelas Review
