@@ -11,12 +11,7 @@ import LaporanAkhir from "../views/LaporanAkhir.vue";
 import Login from "../views/Login.vue";
 import KelolaASM from "../views/KelolaASM.vue";
 import Tugas from "../views/Tugas.vue";
-
-// Import Komponen Khusus Bang Samuel
-// PASTIKAN Kakak sudah membuat file bernama WaliKelas67.vue di folder views!
-import WaliKelas67 from "../views/WaliKelas67.vue"; 
-import AbsensiSamuel from '../views/AbsensiSamuel.vue';
-import PenilaianSamuel from '../views/PenilaianSamuel.vue';
+import PenilaianSamuel from '../views/PenilaianKustom.vue';
 
 const routes = [
   // === RUTE PUBLIK ===
@@ -45,7 +40,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   
-  // -- Rute Kelas 3-5 (Kak Ali) --
+  // -- Rute Utama (Kelas 3-5) --
   {
     path: "/absensi",
     name: "Absensi",
@@ -70,24 +65,10 @@ const routes = [
     component: Haporseaon,
     meta: { requiresAuth: true },
   },
-
-  // -- Rute Kelas 6-7 (Bang Samuel) --
   {
-    path: "/absensi-samuel",
-    name: "AbsensiSamuel",
-    component: AbsensiSamuel,
-    meta: { requiresAuth: true },
-  },
-  // INI SUDAH SAYA AKTIFKAN KEMBALI 🚀
-  {
-    path: "/tugas-besar",
-    name: "WaliKelas67",
-    component: WaliKelas67,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/penilaian-samuel",
-    name: "PenilaianSamuel",
+    // Ini sekarang menjadi halaman Penilaian Kustom
+    path: "/penilaian-kustom", 
+    name: "PenilaianKustom",
     component: PenilaianSamuel,
     meta: { requiresAuth: true },
   },

@@ -3,21 +3,17 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-white">Laporan Akhir SIL HKBP 2026</h1>
-        <p class="text-sm text-gray-400 mt-1">Rekapitulasi Cerdas Terintegrasi (Kelas 3-5 & Kelas 6-7)</p>
+        <p class="text-sm text-gray-400 mt-1">Rekapitulasi Nilai Semua Kelas (3 - 7) Selama 7 Hari Kegiatan</p>
       </div>
     </div>
 
     <div class="bg-[#151e32] border border-gray-800 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div class="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-        <label class="font-medium text-gray-400 text-sm">Filter Kategori:</label>
-        <select 
-          v-model="filterCategory" 
-          class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition text-sm font-bold"
-        >
-          <option value="all">Semua Kelas (3 - 7)</option>
-          <option value="3-5">Kelas 3 - 5 (Fasilitator: Ali)</option>
-          <option value="6-7">Kelas 6 - 7 (Fasilitator: Samuel)</option>
-        </select>
+        <div class="bg-[#0f172a] border border-gray-700 rounded-lg px-4 py-2.5 flex items-center gap-2">
+          <span class="text-lg">📊</span>
+          <span class="font-bold text-teal-400 text-sm">Total Data: {{ aggregatedStudents.length }} Anak</span>
+        </div>
+        
         <button @click="fetchAggregatedData" class="w-full sm:w-auto bg-[#0f172a] border border-gray-700 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg transition shadow-lg text-sm font-medium flex items-center justify-center gap-2">
           <span>🔄</span> Segarkan Data
         </button>
@@ -33,9 +29,9 @@
         <table class="w-full text-left text-sm whitespace-nowrap">
           <thead>
             <tr class="border-b border-gray-700 text-gray-400 bg-[#0f172a]">
-              <th class="p-3 font-semibold rounded-tl-lg border-r border-gray-800">No</th>
-              <th class="p-3 font-semibold border-r border-gray-800">Nama Lengkap</th>
-              <th class="p-3 font-semibold text-center border-r border-gray-800">Kelas</th>
+              <th class="p-3 font-semibold rounded-tl-lg border-r border-gray-800 w-10 text-center">No</th>
+              <th class="p-3 font-semibold border-r border-gray-800 min-w-[150px]">Nama Lengkap</th>
+              <th class="p-3 font-semibold text-center border-r border-gray-800 w-20">Kelas</th>
               
               <th class="p-3 font-semibold text-center text-blue-300">Rerata<br>Hadir</th>
               <th class="p-3 font-semibold text-center text-teal-300">Rerata<br>Tugas</th>
@@ -43,26 +39,21 @@
               <th class="p-3 font-semibold text-center text-teal-300">Rerata<br>Kuis</th>
               <th class="p-3 font-semibold text-center text-teal-300 border-r border-gray-800">Rerata<br>Tontonan</th>
               
-              <th v-if="filterCategory !== '6-7'" class="p-3 font-semibold text-center text-sky-300">Doa Bapa<br>Kami</th>
-              <th v-if="filterCategory !== '6-7'" class="p-3 font-semibold text-center text-sky-300">Iman<br>Rasuli</th>
-              <th class="p-3 font-semibold text-center text-sky-300 border-r border-gray-800">
-                <span v-if="filterCategory === '6-7'">Rerata Topik<br>Kustom (Samuel)</span>
-                <span v-else-if="filterCategory === 'all'">Titah /<br>Topik Kustom</span>
-                <span v-else>Titah</span>
-              </th>
+              <th class="p-3 font-semibold text-center text-sky-300">Hafalan<br>Titah</th>
+              <th class="p-3 font-semibold text-center text-sky-300 border-r border-gray-800">Hata<br>Haporseaon</th>
               
-              <th class="p-3 font-bold text-white text-center rounded-tr-lg bg-teal-600">NILAI<br>AKHIR</th>
+              <th class="p-3 font-bold text-white text-center rounded-tr-lg bg-teal-600 w-24">NILAI<br>AKHIR</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="filteredStudents.length === 0">
-              <td colspan="12" class="text-center py-8 text-gray-500">Memuat data atau tidak ada data tersedia...</td>
+            <tr v-if="aggregatedStudents.length === 0">
+              <td colspan="11" class="text-center py-8 text-gray-500">Memuat data atau belum ada data masuk...</td>
             </tr>
-            <tr v-for="(student, index) in filteredStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
-              <td class="p-3 text-gray-500 border-r border-gray-800/50">{{ index + 1 }}</td>
+            <tr v-for="(student, index) in aggregatedStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
+              <td class="p-3 text-gray-500 border-r border-gray-800/50 text-center">{{ index + 1 }}</td>
               <td class="p-3 text-gray-200 font-medium border-r border-gray-800/50">{{ student.nama_lengkap }}</td>
               <td class="p-3 text-center border-r border-gray-800/50">
-                <span :class="student.kelas <= 5 ? 'bg-teal-900/50 text-teal-300' : 'bg-sky-900/50 text-sky-300'" class="px-2 py-1 rounded text-xs">
+                <span :class="student.kelas <= 5 ? 'bg-teal-900/50 text-teal-300 border-teal-800/30' : 'bg-sky-900/50 text-sky-300 border-sky-800/30'" class="px-2 py-1 rounded text-xs font-bold border">
                   Kls {{ student.kelas }}
                 </span>
               </td>
@@ -73,11 +64,12 @@
               <td class="p-3 text-center text-teal-400 bg-teal-900/10">{{ student.rerata_kuis }}</td>
               <td class="p-3 text-center text-teal-400 bg-teal-900/10 border-r border-gray-800/50">{{ student.rerata_tontonan }}</td>
               
-              <td v-if="filterCategory !== '6-7'" class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_doa }}</td>
-              <td v-if="filterCategory !== '6-7'" class="p-3 text-center text-sky-400 bg-sky-900/10">{{ student.skor_haporseaon }}</td>
-              <td class="p-3 text-center font-bold text-sky-400 bg-sky-900/10 border-r border-gray-800/50">{{ student.skor_titah }}</td>
+              <td class="p-3 text-center font-bold text-sky-400 bg-sky-900/10">{{ student.skor_titah || '-' }}</td>
+              <td class="p-3 text-center font-bold text-sky-400 bg-sky-900/10 border-r border-gray-800/50">{{ student.skor_haporseaon || '-' }}</td>
               
-              <td class="p-3 text-center font-black text-white bg-teal-600/80 text-base shadow-inner">{{ student.nilai_akhir }}</td>
+              <td class="p-3 text-center font-black text-white bg-teal-600/80 text-base shadow-inner border border-teal-700/50">
+                {{ student.nilai_akhir }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -87,15 +79,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { supabase } from '../supabase'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-const filterCategory = ref('all')
 const aggregatedStudents = ref([])
 
-// Helper: Konversi Huruf ke Angka
+// Helper: Konversi Huruf ke Angka untuk Tugas Harian
 const getPoint = (grade) => {
   if (grade === 'A') return 95
   if (grade === 'B') return 85
@@ -103,141 +94,103 @@ const getPoint = (grade) => {
   return 0
 }
 
-// === FUNGSI MASTER PENGAMBIL DATA ===
+// === FUNGSI PENGAMBIL DAN PENGHITUNG DATA (SEMUA KELAS 3 - 7) ===
 const fetchAggregatedData = async () => {
-  const { data: students } = await supabase.from('students').select('*').order('kelas', { ascending: true })
-  const { data: attendance } = await supabase.from('attendance').select('*')
-  const { data: tugas } = await supabase.from('tugas').select('*')
-  const { data: hafalan } = await supabase.from('hafalan').select('*')
+  // 1. Ambil murid Kelas 3, 4, 5, 6, 7
+  const { data: students } = await supabase.from('students').select('*').in('kelas', [3, 4, 5, 6, 7]).order('kelas', { ascending: true })
+  
+  if (!students) return
+  
+  const studentIds = students.map(s => s.id)
 
-  if (students) {
-    aggregatedStudents.value = students.map(student => {
-      
-      // 1. RERATA ABSENSI (Dibagi 7 Hari)
-      const studentAttendance = attendance?.filter(a => a.student_id === student.id) || []
-      let totalAbsen = 0
-      studentAttendance.forEach(a => totalAbsen += a.skor)
-      const rerataHadir = Math.round(totalAbsen / 7) 
+  // 2. Ambil seluruh data 7 hari untuk murid-murid tersebut
+  const { data: attendance } = await supabase.from('attendance').select('student_id, skor').in('student_id', studentIds)
+  const { data: tugas } = await supabase.from('tugas').select('*').in('student_id', studentIds)
+  const { data: hafalan } = await supabase.from('hafalan').select('student_id, jenis_hafalan, skor').in('student_id', studentIds)
 
-      // 2. RERATA TUGAS HARIAN (Dibagi 7 Hari)
-      const studentTugas = tugas?.filter(t => t.student_id === student.id) || []
-      let sTugas = 0, sBacaan = 0, sKuis = 0, sTontonan = 0
-      
-      studentTugas.forEach(t => {
-        sTugas += getPoint(t.tugas_harian)
-        sBacaan += getPoint(t.reviu_bacaan)
-        sKuis += getPoint(t.kuis)
-        sTontonan += getPoint(t.reviu_tontonan)
-      })
+  aggregatedStudents.value = students.map(student => {
+    
+    // -- RERATA KEHADIRAN (Dibagi 7) --
+    const studentAttendance = attendance?.filter(a => a.student_id === student.id) || []
+    let totalAbsen = 0
+    studentAttendance.forEach(a => totalAbsen += a.skor)
+    const rerataHadir = Math.round(totalAbsen / 7) 
 
-      const rerataTugas = Math.round(sTugas / 7)
-      const rerataBacaan = Math.round(sBacaan / 7)
-      const rerataKuis = Math.round(sKuis / 7)
-      const rerataTontonan = Math.round(sTontonan / 7)
-
-      // 3. LOGIKA KELAS KECIL (Ali) VS KELAS BESAR (Samuel)
-      const studentHafalan = hafalan?.filter(h => h.student_id === student.id) || []
-      let skorDoa = 0, skorHaporseaon = 0, skorTitah = 0, nilaiAkhir = 0
-
-      if (student.kelas <= 5) {
-        // --- LOGIKA KAK ALI (Hafalan Fix) ---
-        const doa = studentHafalan.find(h => h.jenis_hafalan === 'Doa Bapa Kami')
-        const haporseaon = studentHafalan.find(h => h.jenis_hafalan === 'Hata Haporseaon')
-        const titah = studentHafalan.find(h => h.jenis_hafalan === 'Titah')
-        
-        skorDoa = doa ? doa.skor : 0
-        skorHaporseaon = haporseaon ? haporseaon.skor : 0
-        skorTitah = titah ? titah.skor : 0
-
-        // Total 8 Komponen (1 Absen + 4 Tugas + 3 Hafalan)
-        const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + skorDoa + skorHaporseaon + skorTitah
-        nilaiAkhir = Math.round(totalSemua / 8)
-
-      } else {
-        // --- LOGIKA BANG SAMUEL (Topik Kustom Dinamis) ---
-        // Saring hanya topik kustom (abaikan nama topik fix jika ada yang bocor)
-        const hafalanSamuel = studentHafalan.filter(h => !['Doa Bapa Kami', 'Hata Haporseaon', 'Titah'].includes(h.jenis_hafalan))
-        
-        let totalSkorSamuel = 0
-        let uniqueTopics = new Set()
-        
-        hafalanSamuel.forEach(h => {
-          totalSkorSamuel += h.skor
-          uniqueTopics.add(h.jenis_hafalan)
-        })
-        
-        // Cari rata-rata per topik selama 7 hari
-        const jumlahTopik = uniqueTopics.size > 0 ? uniqueTopics.size : 1
-        const rerataCustom = Math.round((totalSkorSamuel / 7) / jumlahTopik)
-
-        skorDoa = '-'
-        skorHaporseaon = '-'
-        skorTitah = rerataCustom // Kita taruh Rerata Topik Kustom di kolom ini untuk menghemat ruang tabel
-
-        // Karena Samuel menggunakan 1 "Rerata Custom", kita kalikan 3 agar bobotnya sama adilnya dengan 3 Hafalan Kak Ali (Total tetap 8 komponen)
-        const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + (rerataCustom * 3)
-        nilaiAkhir = Math.round(totalSemua / 8)
-      }
-
-      return {
-        ...student,
-        rerata_hadir: rerataHadir,
-        rerata_tugas: rerataTugas,
-        rerata_bacaan: rerataBacaan,
-        rerata_kuis: rerataKuis,
-        rerata_tontonan: rerataTontonan,
-        skor_doa: skorDoa,
-        skor_haporseaon: skorHaporseaon,
-        skor_titah: skorTitah,
-        nilai_akhir: nilaiAkhir
-      }
+    // -- RERATA TUGAS HARIAN (Dibagi 7) --
+    const studentTugas = tugas?.filter(t => t.student_id === student.id) || []
+    let sTugas = 0, sBacaan = 0, sKuis = 0, sTontonan = 0
+    
+    studentTugas.forEach(t => {
+      sTugas += getPoint(t.tugas_harian)
+      sBacaan += getPoint(t.reviu_bacaan)
+      sKuis += getPoint(t.kuis)
+      sTontonan += getPoint(t.reviu_tontonan)
     })
-  }
+
+    const rerataTugas = Math.round(sTugas / 7)
+    const rerataBacaan = Math.round(sBacaan / 7)
+    const rerataKuis = Math.round(sKuis / 7)
+    const rerataTontonan = Math.round(sTontonan / 7)
+
+    // -- HAFALAN WAJIB (Titah & Haporseaon) --
+    const studentHafalan = hafalan?.filter(h => h.student_id === student.id) || []
+    const titah = studentHafalan.find(h => h.jenis_hafalan === 'Titah')
+    const haporseaon = studentHafalan.find(h => h.jenis_hafalan === 'Hata Haporseaon')
+    
+    const skorTitah = titah ? titah.skor : 0
+    const skorHaporseaon = haporseaon ? haporseaon.skor : 0
+
+    // -- KALKULASI NILAI AKHIR (Rata-rata dari 7 Komponen) --
+    // Komponen: 1 Absen + 4 Tugas + 2 Hafalan
+    const totalSemua = rerataHadir + rerataTugas + rerataBacaan + rerataKuis + rerataTontonan + skorTitah + skorHaporseaon
+    const nilaiAkhir = Math.round(totalSemua / 7) // Dibagi 7 komponen
+
+    return {
+      ...student,
+      rerata_hadir: rerataHadir,
+      rerata_tugas: rerataTugas,
+      rerata_bacaan: rerataBacaan,
+      rerata_kuis: rerataKuis,
+      rerata_tontonan: rerataTontonan,
+      skor_titah: skorTitah,
+      skor_haporseaon: skorHaporseaon,
+      nilai_akhir: nilaiAkhir
+    }
+  })
 }
 
 onMounted(() => { fetchAggregatedData() })
 
-const filteredStudents = computed(() => {
-  if (filterCategory.value === '3-5') {
-    return aggregatedStudents.value.filter(s => [3, 4, 5].includes(s.kelas))
-  } else if (filterCategory.value === '6-7') {
-    return aggregatedStudents.value.filter(s => [6, 7].includes(s.kelas))
-  }
-  return aggregatedStudents.value
-})
-
-// === EXPORT PDF CERDAS ===
+// === EXPORT PDF ===
 const exportToPDF = () => {
+  if (aggregatedStudents.value.length === 0) return alert("Belum ada data untuk dicetak!")
+
   const doc = new jsPDF('landscape')
   const tanggalSekarang = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
   doc.setFontSize(16)
   doc.setTextColor(0, 0, 0)
-  doc.text(`FORMAT REKAP PENILAIAN SIL HKBP BENGKALIS 2026`, 14, 15)
+  doc.text(`REKAPITULASI PENILAIAN SIL HKBP BENGKALIS 2026`, 14, 15)
   
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
-  let textFilter = filterCategory.value === 'all' ? 'Semua Kelas (3-7)' : `Kategori: Kelas ${filterCategory.value}`
-  doc.text(`${textFilter} | Dicetak: ${tanggalSekarang}`, 14, 22)
+  doc.text(`Kategori: Semua Kelas (3 - 7) | Dicetak: ${tanggalSekarang}`, 14, 22)
   
-  // Penyesuaian Kolom Header & Body berdasarkan Filter
-  let headTabel = []
-  let bodyData = []
-
-  if (filterCategory.value === '6-7') {
-    // Mode Samuel: Sembunyikan Doa & Haporseaon, ubah Titah jadi Topik Kustom
-    headTabel = [['No', 'Nama Anak', 'Kelas', 'Kehadiran', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Rerata Topik Kustom', 'NILAI AKHIR']]
-    bodyData = filteredStudents.value.map((s, idx) => [
-      idx + 1, s.nama_lengkap, `Kls ${s.kelas}`, s.rerata_hadir.toString(), s.rerata_tugas.toString(), s.rerata_bacaan.toString(), s.rerata_kuis.toString(), s.rerata_tontonan.toString(), s.skor_titah.toString(), s.nilai_akhir.toString()
-    ])
-  } else {
-    // Mode Ali / Mode Semua
-    const labelHafalan3 = filterCategory.value === 'all' ? 'Titah / Kustom' : 'Titah'
-    headTabel = [['No', 'Nama Anak', 'Kelas', 'Kehadiran', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Doa Bapa Kami', 'Iman Rasuli', labelHafalan3, 'NILAI AKHIR']]
-    bodyData = filteredStudents.value.map((s, idx) => [
-      idx + 1, s.nama_lengkap, `Kls ${s.kelas}`, s.rerata_hadir.toString(), s.rerata_tugas.toString(), s.rerata_bacaan.toString(), s.rerata_kuis.toString(), s.rerata_tontonan.toString(), s.skor_doa.toString(), s.skor_haporseaon.toString(), s.skor_titah.toString(), s.nilai_akhir.toString()
-    ])
-  }
+  const headTabel = [['No', 'Nama Anak', 'Kelas', 'Hadir', 'Tugas', 'Bacaan', 'Kuis', 'Tontonan', 'Titah', 'Haporseaon', 'NILAI AKHIR']]
+  
+  const bodyData = aggregatedStudents.value.map((s, idx) => [
+    idx + 1, 
+    s.nama_lengkap, 
+    `Kls ${s.kelas}`, 
+    s.rerata_hadir.toString(), 
+    s.rerata_tugas.toString(), 
+    s.rerata_bacaan.toString(), 
+    s.rerata_kuis.toString(), 
+    s.rerata_tontonan.toString(), 
+    s.skor_titah.toString(), 
+    s.skor_haporseaon.toString(), 
+    s.nilai_akhir.toString()
+  ])
   
   autoTable(doc, {
     startY: 28,
@@ -248,18 +201,15 @@ const exportToPDF = () => {
     bodyStyles: { fontSize: 8 },
     columnStyles: {
       0: { halign: 'center', cellWidth: 10 },
-      1: { cellWidth: 40 },
+      1: { cellWidth: 45 },
       2: { halign: 'center', cellWidth: 15 },
       // Rata tengah untuk semua kolom angka
       3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
       6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
-      9: { halign: 'center' }, 10: { halign: 'center' }, 11: { halign: 'center' },
-      [headTabel[0].length - 1]: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } // Highlight Nilai Akhir
+      9: { halign: 'center' }, 
+      10: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } // Highlight Nilai Akhir
     }
   })
-  
-  const formatTanggalFile = new Date().toISOString().split('T')[0] 
-  const fileName = `Rekap_Penilaian_SIL_${filterCategory.value}_${formatTanggalFile}`
   
   window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }

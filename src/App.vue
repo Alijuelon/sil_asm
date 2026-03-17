@@ -38,7 +38,7 @@
           </router-link>
         </div>
 
-        <div v-if="currentUserEmail === 'alijuelonsinaga01@gmail.com'" class="bg-teal-900/10 border border-teal-900/30 rounded-xl p-2 shadow-sm">
+        <div class="bg-teal-900/10 border border-teal-900/30 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-teal-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 3-5</div>
           <router-link @click="isSidebarOpen = false" to="/absensi" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">📋</span> Absensi Kls (3-5)
@@ -52,18 +52,8 @@
           <router-link @click="isSidebarOpen = false" to="/haporseaon" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">⛪</span> Hata Haporseaon
           </router-link>
-        </div>
-
-        <div v-if="currentUserEmail === 'samuelmt@gmail.com'" class="bg-sky-900/10 border border-sky-900/30 rounded-xl p-2 shadow-sm">
-          <div class="text-[10px] font-bold text-sky-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 6-7</div>
-          <router-link @click="isSidebarOpen = false" to="/absensi-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">📋</span> Absensi Kls (6-7)
-          </router-link>
-         <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">📘</span> Wali Kelas Review
-          </router-link>
-          <router-link @click="isSidebarOpen = false" to="/penilaian-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">⭐</span> Penilaian
+          <router-link @click="isSidebarOpen = false" to="/penilaian-kustom" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">⭐</span> Penilaian Kustom
           </router-link>
         </div>
 
@@ -92,7 +82,7 @@
         
         <div class="flex items-center gap-3 md:gap-6 shrink-0 ml-4">
           <div class="flex items-center gap-2 md:gap-3 border-l border-gray-700 pl-4 md:pl-6">
-            <div :class="currentUserEmail === 'samuelmt@gmail.com' ? 'bg-sky-600' : 'bg-teal-600'" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+            <div class="bg-teal-600 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
               {{ profileInitials }}
             </div>
             <span class="text-sm font-medium text-gray-200 hidden sm:block">{{ profileName }}</span>
@@ -134,12 +124,10 @@ const isSidebarOpen = ref(false)
 const showLogoutModal = ref(false)
 const currentUserEmail = ref('')
 
-// Cek rute publik (Login / Landing Page)
 const isPublicRoute = computed(() => {
   return ['Login', 'LandingPage'].includes(route.name)
 })
 
-// === LOGIKA NAMA & INISIAL DINAMIS ===
 const profileName = computed(() => {
   if (!currentUserEmail.value) return 'Memuat...'
   const namePart = currentUserEmail.value.split('@')[0]
@@ -152,17 +140,13 @@ const profileInitials = computed(() => {
   return namePart.substring(0, 2).toUpperCase()
 })
 
-// === KUNCI PERBAIKAN: onAuthStateChange ===
 onMounted(() => {
-  // 1. Cek sesi saat halaman pertama kali direfresh
   supabase.auth.getSession().then(({ data }) => {
     if (data.session?.user) {
-      // Pastikan selalu huruf kecil agar pengecekan v-if tidak gagal
       currentUserEmail.value = data.session.user.email.toLowerCase() 
     }
   })
 
-  // 2. Pantau perubahan status (Saat baru klik tombol Login)
   supabase.auth.onAuthStateChange((_event, session) => {
     if (session?.user) {
       currentUserEmail.value = session.user.email.toLowerCase()
