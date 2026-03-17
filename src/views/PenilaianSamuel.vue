@@ -3,7 +3,7 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-sky-400">Penilaian Topik Kustom</h1>
-        <p class="text-sm text-gray-400 mt-1">Kelola berbagai jenis penilaian secara fleksibel (Khusus Kelas 6-7)</p>
+        <p class="text-sm text-gray-400 mt-1">Buat dan kelola jenis penilaian tambahan (Aman dari data utama)</p>
       </div>
     </div>
 
@@ -48,64 +48,116 @@
       </div>
     </div>
 
-    <div v-if="activeTopic" class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col">
-      <div class="border-b border-gray-800 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h2 class="text-lg font-bold text-sky-400">Menilai: <span class="text-white border-b-2 border-sky-500 pb-0.5">"{{ activeTopic }}"</span></h2>
-          <span class="text-xs bg-sky-900/50 text-sky-300 px-2 py-1 rounded mt-2 inline-block">Hari Ke-{{ selectedDay }} | Kelas 6-7</span>
-        </div>
+    <div v-if="activeTopic">
+      <div class="bg-[#151e32] border border-gray-800 p-4 rounded-xl shadow-lg mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <h2 class="text-lg font-bold text-sky-400">Menilai: <span class="text-white border-b border-sky-500">"{{ activeTopic }}"</span> <span class="text-gray-500 text-sm ml-2">(Hari Ke-{{ selectedDay }})</span></h2>
         
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button @click="exportToPDF" class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-4 py-2 rounded-lg transition text-sm font-bold flex items-center justify-center gap-2">
-            📄 Cetak PDF
-          </button>
-          <button @click="markAllA" class="flex-1 sm:flex-none text-xs bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center justify-center gap-2 font-bold">
-            ✅ Beri "A" Semua
-          </button>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button @click="exportToPDF('left')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Kls 3-5</button>
+          <button @click="exportToPDF('right')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Kls 6-7</button>
         </div>
-      </div>
-      
-      <div class="overflow-x-auto flex-1 custom-scrollbar pb-2">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead>
-            <tr class="border-b border-gray-800 text-gray-400 bg-[#0f172a]">
-              <th class="p-3 font-medium rounded-tl-lg w-10">No</th>
-              <th class="p-3 font-medium min-w-[200px]">Nama Lengkap</th>
-              <th class="p-3 font-medium text-center w-24">Kelas</th>
-              <th class="p-3 font-medium min-w-[150px]">Nilai (A/B/C)</th>
-              <th class="p-3 font-medium text-center rounded-tr-lg w-16">Skor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="paginatedStudents.length === 0">
-              <td colspan="5" class="text-center py-8 text-gray-500">Tidak ada data kelas 6-7.</td>
-            </tr>
-            <tr v-for="(student, index) in paginatedStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
-              <td class="p-3 text-gray-500">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-              <td class="p-3 text-gray-200 font-medium">{{ student.nama_lengkap }}</td>
-              <td class="p-3 text-center"><span class="text-sky-400 font-bold bg-sky-900/30 px-2 py-1 rounded border border-sky-800">Kls {{ student.kelas }}</span></td>
-              
-              <td class="p-3">
-                <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-sky-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum Dinilai</option>
-                  <option value="A">Nilai A (95)</option>
-                  <option value="B">Nilai B (85)</option>
-                  <option value="C">Nilai C (70)</option>
-                </select>
-              </td>
-              
-              <td class="p-3 text-center font-bold text-sky-400 text-base bg-[#0f172a]/30">
-                {{ getPoint(student.status_nilai) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
 
-      <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
-        <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm font-medium">Sebelumnya</button>
-        <span class="text-sm text-gray-500 font-medium">Halaman {{ currentPage }} dari {{ totalPages || 1 }}</span>
-        <button @click="currentPage++" :disabled="currentPage === totalPages || totalPages === 0" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm font-medium">Selanjutnya</button>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        
+        <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
+          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-bold text-teal-400">👦👧 Kategori Kelas 3 - 5</h2>
+              <span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredLeft.length }} Anak</span>
+            </div>
+            <button @click="markAllA('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow transition font-bold">
+              ✅ Beri Nilai A
+            </button>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+              <thead>
+                <tr class="border-b border-gray-800 text-gray-400">
+                  <th class="pb-3 font-medium px-2 min-w-[140px]">Nama Lengkap</th>
+                  <th class="pb-3 font-medium px-2 min-w-[70px] text-center">Kelas</th>
+                  <th class="pb-3 font-medium px-2 min-w-[120px]">Nilai</th>
+                  <th class="pb-3 font-medium px-2 min-w-[50px] text-center">Skor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="paginatedLeft.length === 0">
+                  <td colspan="4" class="text-center py-6 text-gray-500">Tidak ada data.</td>
+                </tr>
+                <tr v-for="student in paginatedLeft" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
+                  <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
+                  <td class="py-3 px-2 text-center"><span class="text-teal-400 font-bold bg-teal-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
+                  <td class="py-3 px-2">
+                    <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                      <option value="Belum">Belum Dinilai</option>
+                      <option value="A">Nilai A (95)</option>
+                      <option value="B">Nilai B (85)</option>
+                      <option value="C">Nilai C (70)</option>
+                    </select>
+                  </td>
+                  <td class="py-3 px-2 text-center font-bold text-teal-400">{{ getPoint(student.status_nilai) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
+            <button @click="pageLeft--" :disabled="pageLeft === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
+            <span class="text-xs text-gray-500">Hal {{ pageLeft }} dari {{ totalPagesLeft || 1 }}</span>
+            <button @click="pageLeft++" :disabled="pageLeft === totalPagesLeft || totalPagesLeft === 0" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Next</button>
+          </div>
+        </div>
+
+        <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
+          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-bold text-sky-400">🧑👩 Kategori Kelas 6 - 7</h2>
+              <span class="text-xs bg-sky-900/50 text-sky-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredRight.length }} Anak</span>
+            </div>
+            <button @click="markAllA('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg shadow transition font-bold">
+              ✅ Beri Nilai A
+            </button>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+              <thead>
+                <tr class="border-b border-gray-800 text-gray-400">
+                  <th class="pb-3 font-medium px-2 min-w-[140px]">Nama Lengkap</th>
+                  <th class="pb-3 font-medium px-2 min-w-[70px] text-center">Kelas</th>
+                  <th class="pb-3 font-medium px-2 min-w-[120px]">Nilai</th>
+                  <th class="pb-3 font-medium px-2 min-w-[50px] text-center">Skor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="paginatedRight.length === 0">
+                  <td colspan="4" class="text-center py-6 text-gray-500">Tidak ada data.</td>
+                </tr>
+                <tr v-for="student in paginatedRight" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
+                  <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
+                  <td class="py-3 px-2 text-center"><span class="text-sky-400 font-bold bg-sky-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
+                  <td class="py-3 px-2">
+                    <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-sky-500 focus:outline-none text-xs transition">
+                      <option value="Belum">Belum Dinilai</option>
+                      <option value="A">Nilai A (95)</option>
+                      <option value="B">Nilai B (85)</option>
+                      <option value="C">Nilai C (70)</option>
+                    </select>
+                  </td>
+                  <td class="py-3 px-2 text-center font-bold text-sky-400">{{ getPoint(student.status_nilai) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
+            <button @click="pageRight--" :disabled="pageRight === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
+            <span class="text-xs text-gray-500">Hal {{ pageRight }} dari {{ totalPagesRight || 1 }}</span>
+            <button @click="pageRight++" :disabled="pageRight === totalPagesRight || totalPagesRight === 0" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Next</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -129,7 +181,7 @@ import { supabase } from '../supabase'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-// State Panel Kontrol
+// State Panel
 const selectedDay = ref(1)
 const selectedMode = ref('')
 const newTopicName = ref('')
@@ -141,7 +193,8 @@ const allStudents = ref([])
 
 // State UI
 const toastMsg = ref('')
-const currentPage = ref(1)
+const pageLeft = ref(1)
+const pageRight = ref(1)
 const itemsPerPage = 10 
 
 const showToast = (message) => {
@@ -149,7 +202,6 @@ const showToast = (message) => {
   setTimeout(() => toastMsg.value = '', 2000)
 }
 
-// Konversi Huruf ke Angka
 const getPoint = (grade) => {
   if (grade === 'A') return 95
   if (grade === 'B') return 85
@@ -157,35 +209,33 @@ const getPoint = (grade) => {
   return 0
 }
 
-// 1. MENGAMBIL DAFTAR TOPIK YANG SUDAH PERNAH DIBUAT
+// 1. AMBIL DAFTAR TOPIK CUSTOM YANG SUDAH PERNAH ADA
 const loadExistingTopics = async () => {
-  // Ambil semua data hafalan untuk anak kelas 6 & 7 saja
-  const { data: students } = await supabase.from('students').select('id').in('kelas', [6, 7])
-  if (!students) return
-
-  const studentIds = students.map(s => s.id)
-  const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan').in('student_id', studentIds)
+  // Ambil SEMUA data hafalan (Pagar pengaman adalah membuang nama topik utama)
+  const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan')
 
   if (hafalan) {
-    // Saring agar namanya tidak duplikat
     const uniqueTopics = [...new Set(hafalan.map(h => h.jenis_hafalan))]
-    
-    // PENGAMAN: Jangan masukkan topik wajib milik Kak Ali
+    // INI PAGAR PENGAMANNYA: Jangan masukkan Titah, Haporseaon, Doa Bapa Kami
     const excludedTopics = ['Titah', 'Hata Haporseaon', 'Doa Bapa Kami']
     availableTopics.value = uniqueTopics.filter(t => !excludedTopics.includes(t))
   }
 }
 
-onMounted(() => {
-  loadExistingTopics()
-})
+onMounted(() => loadExistingTopics())
 
-// 2. MENGAMBIL DATA PENILAIAN BERDASARKAN TOPIK & HARI
+// 2. MUAT DATA MURID KIRI & KANAN (Aman karena nama topik kustom)
 const loadPenilaianData = async () => {
-  // Validasi Input
   let topicToLoad = ''
   if (selectedMode.value === 'BARU') {
     if (!newTopicName.value.trim()) return alert("Nama topik baru tidak boleh kosong!")
+    
+    // Pagar Pengaman Ekstra: Cegah Bang Samuel bikin topik dengan nama "Titah"
+    const forbidden = ['titah', 'hata haporseaon', 'doa bapa kami']
+    if (forbidden.includes(newTopicName.value.trim().toLowerCase())) {
+      return alert("Nama topik dilarang! Topik ini sudah dipakai sistem.")
+    }
+    
     topicToLoad = newTopicName.value.trim()
   } else if (selectedMode.value !== '') {
     topicToLoad = selectedMode.value
@@ -193,21 +243,20 @@ const loadPenilaianData = async () => {
     return alert("Silakan pilih topik atau buat topik baru terlebih dahulu!")
   }
 
-  // Kunci topik yang akan dinilai
   activeTopic.value = topicToLoad
-  currentPage.value = 1
+  pageLeft.value = 1
+  pageRight.value = 1
 
-  // Tambahkan ke dropdown jika itu topik baru dan belum ada di list
   if (selectedMode.value === 'BARU' && !availableTopics.value.includes(topicToLoad)) {
     availableTopics.value.push(topicToLoad)
-    selectedMode.value = topicToLoad // Ubah dropdown otomatis ke topik baru tsb
+    selectedMode.value = topicToLoad 
     newTopicName.value = ''
   }
 
-  // Ambil Data Murid
-  const { data: students } = await supabase.from('students').select('*').in('kelas', [6, 7]).order('kelas', { ascending: true })
+  // Tarik SEMUA murid
+  const { data: students } = await supabase.from('students').select('*').order('kelas', { ascending: true })
   
-  // Ambil Data Nilai (Berdasarkan Topik dan Hari)
+  // Tarik nilai berdasarkan TOPIK KUSTOM dan HARI
   const { data: hafalan } = await supabase
     .from('hafalan')
     .select('*')
@@ -226,27 +275,33 @@ const loadPenilaianData = async () => {
   }
 }
 
-// Jika hari diganti, otomatis muat ulang data jika sedang ada topik aktif
 const handleDayChange = () => {
-  if (activeTopic.value) {
-    loadPenilaianData()
-  }
+  if (activeTopic.value) loadPenilaianData()
 }
 
-// === PAGINASI ===
-const totalPages = computed(() => Math.ceil(allStudents.value.length / itemsPerPage))
-const paginatedStudents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return allStudents.value.slice(start, start + itemsPerPage)
+// === COMPUTED KELAS KIRI (3-5) ===
+const filteredLeft = computed(() => allStudents.value.filter(s => [3, 4, 5].includes(s.kelas)))
+const totalPagesLeft = computed(() => Math.ceil(filteredLeft.value.length / itemsPerPage))
+const paginatedLeft = computed(() => {
+  const start = (pageLeft.value - 1) * itemsPerPage
+  return filteredLeft.value.slice(start, start + itemsPerPage)
 })
 
-// === FUNGSI SIMPAN KE DATABASE (Aman & Terisolasi) ===
+// === COMPUTED KELAS KANAN (6-7) ===
+const filteredRight = computed(() => allStudents.value.filter(s => [6, 7].includes(s.kelas)))
+const totalPagesRight = computed(() => Math.ceil(filteredRight.value.length / itemsPerPage))
+const paginatedRight = computed(() => {
+  const start = (pageRight.value - 1) * itemsPerPage
+  return filteredRight.value.slice(start, start + itemsPerPage)
+})
+
+// === FUNGSI SIMPAN AMAN ===
 const saveHafalan = async (student, isSilent = false) => {
   const skor = getPoint(student.status_nilai)
   
   const payload = { 
     student_id: student.id, 
-    jenis_hafalan: activeTopic.value, // Menyimpan dengan nama Topik Kustom
+    jenis_hafalan: activeTopic.value, 
     hari: selectedDay.value,        
     status_nilai: student.status_nilai, 
     skor: skor 
@@ -262,19 +317,20 @@ const saveHafalan = async (student, isSilent = false) => {
   if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (${skor} pt)`)
 }
 
-// Tandai Semua Anak
-const markAllA = async () => {
-  for (let student of allStudents.value) {
+// === TANDAI A SEMUA PER KOLOM ===
+const markAllA = async (section) => {
+  const listToUpdate = section === 'left' ? filteredLeft.value : filteredRight.value
+  for (let student of listToUpdate) {
     if (student.status_nilai !== 'A') {
       student.status_nilai = 'A'
       await saveHafalan(student, true)
     }
   }
-  showToast(`Semua anak Kelas 6-7 diberi Nilai A!`)
+  showToast(`Semua anak Kelas ${section === 'left' ? '3-5' : '6-7'} diberi Nilai A!`)
 }
 
-// === CETAK PDF ===
-const exportToPDF = () => {
+// === EXPORT PDF ===
+const exportToPDF = (mode) => {
   const doc = new jsPDF()
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
@@ -282,10 +338,14 @@ const exportToPDF = () => {
   doc.text(`Penilaian Kustom: ${activeTopic.value}`, 14, 15)
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
-  doc.text(`Fasilitator: Samuel | Kelas 6-7 | Kegiatan Hari Ke-${selectedDay.value}`, 14, 22)
+  
+  let labelKelas = mode === 'left' ? 'Kelas 3-5' : 'Kelas 6-7'
+  let targetData = mode === 'left' ? filteredLeft.value : filteredRight.value
+  
+  doc.text(`Kategori: ${labelKelas} | Kegiatan Hari Ke-${selectedDay.value}`, 14, 22)
   doc.text(`Dicetak pada: ${tanggal}`, 14, 27)
   
-  const bodyData = allStudents.value.map((s, idx) => [
+  const bodyData = targetData.map((s, idx) => [
     idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, s.status_nilai, getPoint(s.status_nilai)
   ])
   
@@ -294,7 +354,7 @@ const exportToPDF = () => {
     head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Huruf', 'Skor Angka']],
     body: bodyData,
     theme: 'grid',
-    headStyles: { fillColor: [14, 165, 233] }, // Warna Biru Samuel
+    headStyles: { fillColor: mode === 'left' ? [20, 184, 166] : [14, 165, 233] }, 
     columnStyles: {
       3: { halign: 'center' },
       4: { halign: 'center', fontStyle: 'bold' }
@@ -308,6 +368,6 @@ const exportToPDF = () => {
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar { height: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #0369a1; border-radius: 4px; }
-.custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #0284c7; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #475569; }
 </style>

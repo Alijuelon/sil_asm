@@ -127,16 +127,27 @@ const getSkor = (status) => {
   }
 }
 
-// === HANYA TARIK KELAS 3, 4, 5 ===
+// === PENGAMANAN DATA: HANYA TARIK KELAS 3, 4, 5 ===
 const fetchStudents = async () => {
   currentPage.value = 1
   
+  // 1. Tarik HANYA murid kelas 3, 4, 5
   const { data: students, error: err1 } = await supabase.from('students').select('*').in('kelas', [3, 4, 5])
-  const { data: attendance, error: err2 } = await supabase.from('attendance').select('*').eq('hari', selectedDay.value)
+  if (err1) return console.error(err1)
 
-  if (!err1 && !err2) {
+  // 2. Ambil ID murid-murid tersebut
+  const studentIds = students.map(s => s.id)
+
+  // 3. Tarik HANYA data absensi milik ID murid tersebut (Aman dari data Bang Samuel)
+  const { data: attendance, error: err2 } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('hari', selectedDay.value)
+    .in('student_id', studentIds) // <--- Ini Pagar Pengamannya!
+
+  if (!err2) {
     allStudents.value = students.map(student => {
-      const existingAbsen = attendance.find(a => a.student_id === student.id)
+      const existingAbsen = attendance?.find(a => a.student_id === student.id)
       return {
         ...student,
         status: existingAbsen ? existingAbsen.status : '',
