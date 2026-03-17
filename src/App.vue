@@ -46,7 +46,10 @@
             <span class="text-lg">📋</span> Absensi Kehadiran
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/tugas" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
-            <span class="text-lg">📚</span> Wali Kelas Review
+            <span class="text-lg">📗</span> Wali Kelas 3-5 (Ali)
+          </router-link>
+          <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">📘</span> Wali Kelas 6-7 (Samuel)
           </router-link>
         </div>
 

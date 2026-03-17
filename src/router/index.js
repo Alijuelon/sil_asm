@@ -11,6 +11,7 @@ import LaporanAkhir from "../views/LaporanAkhir.vue";
 import Login from "../views/Login.vue";
 import KelolaASM from "../views/KelolaASM.vue";
 import Tugas from "../views/Tugas.vue";
+import WaliKelas67 from '../views/WaliKelas67.vue'
 
 const routes = [
   // Rute Publik
@@ -36,6 +37,12 @@ const routes = [
     path: "/kelola-asm",
     name: "KelolaASM",
     component: KelolaASM,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/tugas-besar",
+    name: "WaliKelas67",
+    component: WaliKelas67,
     meta: { requiresAuth: true },
   },
   {
