@@ -10,7 +10,7 @@
     <div class="bg-sky-900/20 border border-sky-800 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col xl:flex-row gap-4 xl:items-end">
       
       <div class="flex flex-col gap-2 w-full xl:w-32">
-        <label class="font-medium text-sky-300 text-sm">Hari:</label>
+        <label class="font-medium text-sky-300 text-sm">Hari Kegiatan:</label>
         <select 
           v-model="selectedDay" 
           @change="handleDayChange"
@@ -37,7 +37,7 @@
             v-if="selectedMode === 'BARU'"
             v-model="newTopicName" 
             type="text" 
-            placeholder="Ketik topik baru (cth: Tokoh Daud)" 
+            placeholder="Ketik topik (cth: Tokoh Daud)" 
             class="sm:w-1/2 bg-[#0f172a] border border-sky-500 border-dashed rounded-lg p-2.5 text-white focus:border-sky-400 focus:outline-none transition font-bold placeholder-gray-500"
           >
 
@@ -53,32 +53,32 @@
         <h2 class="text-lg font-bold text-sky-400">Menilai: <span class="text-white border-b border-sky-500">"{{ activeTopic }}"</span> <span class="text-gray-500 text-sm ml-2">(Hari Ke-{{ selectedDay }})</span></h2>
         
         <div class="flex gap-2 w-full sm:w-auto">
-          <button @click="exportToPDF('left')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Kls 3-5</button>
-          <button @click="exportToPDF('right')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Kls 6-7</button>
+          <button @click="exportToPDF('left')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Cetak Kls 3-5</button>
+          <button @click="exportToPDF('right')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Cetak Kls 6-7</button>
         </div>
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         
         <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
-          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center">
+          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center gap-2">
             <div>
-              <h2 class="text-lg font-bold text-teal-400">👦👧 Kategori Kelas 3 - 5</h2>
+              <h2 class="text-lg font-bold text-teal-400">👦👧 Kelas 3 - 5</h2>
               <span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredLeft.length }} Anak</span>
             </div>
-            <button @click="markAllA('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow transition font-bold">
-              ✅ Beri Nilai A
+            <button @click="markAllToday('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg shadow transition font-bold text-center">
+              ✅ Set Hapal Hari {{ selectedDay }}
             </button>
           </div>
 
           <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
             <table class="w-full text-left text-sm whitespace-nowrap">
               <thead>
-                <tr class="border-b border-gray-800 text-gray-400">
-                  <th class="pb-3 font-medium px-2 min-w-[140px]">Nama Lengkap</th>
-                  <th class="pb-3 font-medium px-2 min-w-[70px] text-center">Kelas</th>
-                  <th class="pb-3 font-medium px-2 min-w-[120px]">Nilai</th>
-                  <th class="pb-3 font-medium px-2 min-w-[50px] text-center">Skor</th>
+                <tr class="border-b border-gray-800 text-gray-400 bg-[#0f172a]">
+                  <th class="p-2 font-medium rounded-tl-lg min-w-[140px]">Nama Lengkap</th>
+                  <th class="p-2 font-medium min-w-[60px] text-center">Kelas</th>
+                  <th class="p-2 font-medium min-w-[160px]">Status Penilaian</th>
+                  <th class="p-2 font-medium rounded-tr-lg min-w-[50px] text-center">Skor</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,44 +90,56 @@
                   <td class="py-3 px-2 text-center"><span class="text-teal-400 font-bold bg-teal-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                   <td class="py-3 px-2">
                     <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                      <option value="Belum">Belum Dinilai</option>
-                      <option value="A">Nilai A (95)</option>
-                      <option value="B">Nilai B (85)</option>
-                      <option value="C">Nilai C (70)</option>
+                      <option value="Belum">-- Pilih Nilai --</option>
+                      <optgroup label="Sesuai Hari Setor (Hafalan)">
+                        <option value="Hari 1">Lancar Hari 1 (100)</option>
+                        <option value="Hari 2">Lancar Hari 2 (97)</option>
+                        <option value="Hari 3">Lancar Hari 3 (94)</option>
+                        <option value="Hari 4">Lancar Hari 4 (91)</option>
+                        <option value="Hari 5">Lancar Hari 5 (88)</option>
+                        <option value="Hari 6">Lancar Hari 6 (85)</option>
+                        <option value="Hari 7">Lancar Hari 7 (82)</option>
+                      </optgroup>
+                      <optgroup label="Indikator Huruf (Tugas)">
+                        <option value="A">Nilai A (95)</option>
+                        <option value="B">Nilai B (85)</option>
+                        <option value="C">Nilai C (75)</option>
+                        <option value="D">Nilai D (65)</option>
+                      </optgroup>
                     </select>
                   </td>
-                  <td class="py-3 px-2 text-center font-bold text-teal-400">{{ getPoint(student.status_nilai) }}</td>
+                  <td class="py-3 px-2 text-center font-bold text-teal-400 bg-[#0f172a]/30">{{ getPoint(student.status_nilai) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           
           <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
-            <button @click="pageLeft--" :disabled="pageLeft === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
-            <span class="text-xs text-gray-500">Hal {{ pageLeft }} dari {{ totalPagesLeft || 1 }}</span>
-            <button @click="pageLeft++" :disabled="pageLeft === totalPagesLeft || totalPagesLeft === 0" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Next</button>
+            <button @click="pageLeft--" :disabled="pageLeft === 1" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Sebelumnya</button>
+            <span class="text-xs text-gray-500 font-medium">Halaman {{ pageLeft }} dari {{ totalPagesLeft || 1 }}</span>
+            <button @click="pageLeft++" :disabled="pageLeft === totalPagesLeft || totalPagesLeft === 0" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Selanjutnya</button>
           </div>
         </div>
 
         <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
-          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center">
+          <div class="border-b border-gray-800 pb-3 mb-4 flex justify-between items-center gap-2">
             <div>
-              <h2 class="text-lg font-bold text-sky-400">🧑👩 Kategori Kelas 6 - 7</h2>
+              <h2 class="text-lg font-bold text-sky-400">🧑👩 Kelas 6 - 7</h2>
               <span class="text-xs bg-sky-900/50 text-sky-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredRight.length }} Anak</span>
             </div>
-            <button @click="markAllA('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg shadow transition font-bold">
-              ✅ Beri Nilai A
+            <button @click="markAllToday('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-2 rounded-lg shadow transition font-bold text-center">
+              ✅ Set Hapal Hari {{ selectedDay }}
             </button>
           </div>
 
           <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
             <table class="w-full text-left text-sm whitespace-nowrap">
               <thead>
-                <tr class="border-b border-gray-800 text-gray-400">
-                  <th class="pb-3 font-medium px-2 min-w-[140px]">Nama Lengkap</th>
-                  <th class="pb-3 font-medium px-2 min-w-[70px] text-center">Kelas</th>
-                  <th class="pb-3 font-medium px-2 min-w-[120px]">Nilai</th>
-                  <th class="pb-3 font-medium px-2 min-w-[50px] text-center">Skor</th>
+                <tr class="border-b border-gray-800 text-gray-400 bg-[#0f172a]">
+                  <th class="p-2 font-medium rounded-tl-lg min-w-[140px]">Nama Lengkap</th>
+                  <th class="p-2 font-medium min-w-[60px] text-center">Kelas</th>
+                  <th class="p-2 font-medium min-w-[160px]">Status Penilaian</th>
+                  <th class="p-2 font-medium rounded-tr-lg min-w-[50px] text-center">Skor</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,22 +151,34 @@
                   <td class="py-3 px-2 text-center"><span class="text-sky-400 font-bold bg-sky-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                   <td class="py-3 px-2">
                     <select v-model="student.status_nilai" @change="saveHafalan(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-sky-500 focus:outline-none text-xs transition">
-                      <option value="Belum">Belum Dinilai</option>
-                      <option value="A">Nilai A (95)</option>
-                      <option value="B">Nilai B (85)</option>
-                      <option value="C">Nilai C (70)</option>
+                      <option value="Belum">-- Pilih Nilai --</option>
+                      <optgroup label="Sesuai Hari Setor (Hafalan)">
+                        <option value="Hari 1">Lancar Hari 1 (100)</option>
+                        <option value="Hari 2">Lancar Hari 2 (97)</option>
+                        <option value="Hari 3">Lancar Hari 3 (94)</option>
+                        <option value="Hari 4">Lancar Hari 4 (91)</option>
+                        <option value="Hari 5">Lancar Hari 5 (88)</option>
+                        <option value="Hari 6">Lancar Hari 6 (85)</option>
+                        <option value="Hari 7">Lancar Hari 7 (82)</option>
+                      </optgroup>
+                      <optgroup label="Indikator Huruf (Tugas)">
+                        <option value="A">Nilai A (95)</option>
+                        <option value="B">Nilai B (85)</option>
+                        <option value="C">Nilai C (75)</option>
+                        <option value="D">Nilai D (65)</option>
+                      </optgroup>
                     </select>
                   </td>
-                  <td class="py-3 px-2 text-center font-bold text-sky-400">{{ getPoint(student.status_nilai) }}</td>
+                  <td class="py-3 px-2 text-center font-bold text-sky-400 bg-[#0f172a]/30">{{ getPoint(student.status_nilai) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           
           <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
-            <button @click="pageRight--" :disabled="pageRight === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
-            <span class="text-xs text-gray-500">Hal {{ pageRight }} dari {{ totalPagesRight || 1 }}</span>
-            <button @click="pageRight++" :disabled="pageRight === totalPagesRight || totalPagesRight === 0" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Next</button>
+            <button @click="pageRight--" :disabled="pageRight === 1" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Sebelumnya</button>
+            <span class="text-xs text-gray-500 font-medium">Halaman {{ pageRight }} dari {{ totalPagesRight || 1 }}</span>
+            <button @click="pageRight++" :disabled="pageRight === totalPagesRight || totalPagesRight === 0" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Selanjutnya</button>
           </div>
         </div>
 
@@ -181,17 +205,14 @@ import { supabase } from '../supabase'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-// State Panel
 const selectedDay = ref(1)
 const selectedMode = ref('')
 const newTopicName = ref('')
 
-// State Data Master
 const availableTopics = ref([])
 const activeTopic = ref('')
 const allStudents = ref([])
 
-// State UI
 const toastMsg = ref('')
 const pageLeft = ref(1)
 const pageRight = ref(1)
@@ -202,21 +223,29 @@ const showToast = (message) => {
   setTimeout(() => toastMsg.value = '', 2000)
 }
 
+// === LOGIKA POIN BARU (MENYESUAIKAN GAMBAR) ===
 const getPoint = (grade) => {
-  if (grade === 'A') return 95
-  if (grade === 'B') return 85
-  if (grade === 'C') return 70
-  return 0
+  switch (grade) {
+    case 'Hari 1': return 100
+    case 'Hari 2': return 97
+    case 'Hari 3': return 94
+    case 'Hari 4': return 91
+    case 'Hari 5': return 88
+    case 'Hari 6': return 85
+    case 'Hari 7': return 82
+    case 'A': return 95
+    case 'B': return 85
+    case 'C': return 75
+    case 'D': return 65
+    default: return 0
+  }
 }
 
-// 1. AMBIL DAFTAR TOPIK CUSTOM YANG SUDAH PERNAH ADA
 const loadExistingTopics = async () => {
-  // Ambil SEMUA data hafalan (Pagar pengaman adalah membuang nama topik utama)
   const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan')
 
   if (hafalan) {
     const uniqueTopics = [...new Set(hafalan.map(h => h.jenis_hafalan))]
-    // INI PAGAR PENGAMANNYA: Jangan masukkan Titah, Haporseaon, Doa Bapa Kami
     const excludedTopics = ['Titah', 'Hata Haporseaon', 'Doa Bapa Kami']
     availableTopics.value = uniqueTopics.filter(t => !excludedTopics.includes(t))
   }
@@ -224,16 +253,14 @@ const loadExistingTopics = async () => {
 
 onMounted(() => loadExistingTopics())
 
-// 2. MUAT DATA MURID KIRI & KANAN (Aman karena nama topik kustom)
 const loadPenilaianData = async () => {
   let topicToLoad = ''
   if (selectedMode.value === 'BARU') {
     if (!newTopicName.value.trim()) return alert("Nama topik baru tidak boleh kosong!")
     
-    // Pagar Pengaman Ekstra: Cegah Bang Samuel bikin topik dengan nama "Titah"
     const forbidden = ['titah', 'hata haporseaon', 'doa bapa kami']
     if (forbidden.includes(newTopicName.value.trim().toLowerCase())) {
-      return alert("Nama topik dilarang! Topik ini sudah dipakai sistem.")
+      return alert("Nama topik dilarang! Topik ini sudah dipakai oleh sistem utama.")
     }
     
     topicToLoad = newTopicName.value.trim()
@@ -253,10 +280,8 @@ const loadPenilaianData = async () => {
     newTopicName.value = ''
   }
 
-  // Tarik SEMUA murid
   const { data: students } = await supabase.from('students').select('*').order('kelas', { ascending: true })
   
-  // Tarik nilai berdasarkan TOPIK KUSTOM dan HARI
   const { data: hafalan } = await supabase
     .from('hafalan')
     .select('*')
@@ -279,7 +304,6 @@ const handleDayChange = () => {
   if (activeTopic.value) loadPenilaianData()
 }
 
-// === COMPUTED KELAS KIRI (3-5) ===
 const filteredLeft = computed(() => allStudents.value.filter(s => [3, 4, 5].includes(s.kelas)))
 const totalPagesLeft = computed(() => Math.ceil(filteredLeft.value.length / itemsPerPage))
 const paginatedLeft = computed(() => {
@@ -287,7 +311,6 @@ const paginatedLeft = computed(() => {
   return filteredLeft.value.slice(start, start + itemsPerPage)
 })
 
-// === COMPUTED KELAS KANAN (6-7) ===
 const filteredRight = computed(() => allStudents.value.filter(s => [6, 7].includes(s.kelas)))
 const totalPagesRight = computed(() => Math.ceil(filteredRight.value.length / itemsPerPage))
 const paginatedRight = computed(() => {
@@ -295,8 +318,9 @@ const paginatedRight = computed(() => {
   return filteredRight.value.slice(start, start + itemsPerPage)
 })
 
-// === FUNGSI SIMPAN AMAN ===
 const saveHafalan = async (student, isSilent = false) => {
+  if (student.status_nilai === 'Belum') return
+
   const skor = getPoint(student.status_nilai)
   
   const payload = { 
@@ -317,19 +341,20 @@ const saveHafalan = async (student, isSilent = false) => {
   if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (${skor} pt)`)
 }
 
-// === TANDAI A SEMUA PER KOLOM ===
-const markAllA = async (section) => {
+// === FUNGSI PINTAR: SET OTOMATIS BERDASARKAN HARI YANG DIPILIH ===
+const markAllToday = async (section) => {
+  const targetGrade = `Hari ${selectedDay.value}`
   const listToUpdate = section === 'left' ? filteredLeft.value : filteredRight.value
+  
   for (let student of listToUpdate) {
-    if (student.status_nilai !== 'A') {
-      student.status_nilai = 'A'
+    if (student.status_nilai !== targetGrade) {
+      student.status_nilai = targetGrade
       await saveHafalan(student, true)
     }
   }
-  showToast(`Semua anak Kelas ${section === 'left' ? '3-5' : '6-7'} diberi Nilai A!`)
+  showToast(`Semua anak otomatis ditandai Lancar Hari ${selectedDay.value}!`)
 }
 
-// === EXPORT PDF ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF()
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -351,11 +376,13 @@ const exportToPDF = (mode) => {
   
   autoTable(doc, {
     startY: 32,
-    head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Huruf', 'Skor Angka']],
+    head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai/Hari', 'Skor Angka']],
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: mode === 'left' ? [20, 184, 166] : [14, 165, 233] }, 
     columnStyles: {
+      0: { halign: 'center' },
+      2: { halign: 'center' },
       3: { halign: 'center' },
       4: { halign: 'center', fontStyle: 'bold' }
     }
