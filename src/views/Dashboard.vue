@@ -11,9 +11,10 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      
       <div class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg flex items-center gap-5">
-        <div :class="isSamuel ? 'bg-sky-500/20 text-sky-400' : 'bg-teal-500/20 text-teal-400'" class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-inner">👥</div>
+        <div :class="isSamuel ? 'bg-sky-500/20 text-sky-400' : 'bg-teal-500/20 text-teal-400'" class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+          👥
+        </div>
         <div>
           <p class="text-gray-400 text-sm font-medium mb-1">Total Anak Asuhan</p>
           <p class="text-3xl font-bold text-white">{{ stats.totalAnak }}</p>
@@ -21,7 +22,9 @@
       </div>
 
       <div class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg flex items-center gap-5">
-        <div class="bg-emerald-500/20 text-emerald-400 w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-inner">✅</div>
+        <div class="bg-emerald-500/20 text-emerald-400 w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-inner">
+          ✅
+        </div>
         <div>
           <p class="text-gray-400 text-sm font-medium mb-1">Hadir (Hari {{ selectedDay }})</p>
           <div class="flex items-end gap-2">
@@ -37,69 +40,46 @@
           <option v-for="day in 7" :key="day" :value="day">Kegiatan Hari {{ day }}</option>
         </select>
       </div>
-
     </div>
 
-    <div v-if="isSamuel" class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg mt-6">
-      <h2 class="text-lg font-bold text-sky-400 mb-4 flex items-center gap-2"><span>⭐</span> Topik Penilaian Kustom (Hari {{ selectedDay }})</h2>
-      
+    <div v-if="isSamuel" class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg">
+      <h2 class="text-lg font-bold text-sky-400 mb-4 flex items-center gap-2"><span>⭐</span> Topik Penilaian Kustom Anda</h2>
       <div v-if="customTopics.length === 0" class="text-center py-6 text-gray-500 border border-dashed border-gray-700 rounded-xl">
-        Belum ada topik kustom yang dinilai pada hari ini.
+        Belum ada topik kustom yang dinilai hari ini.
       </div>
-      
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="topik in customTopics" :key="topik.nama" class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl border-t-2 border-t-sky-500">
-          <h3 class="font-bold text-white mb-3 text-base">{{ topik.nama }}</h3>
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-400">Telah Dinilai:</span>
-            <span class="text-sky-400 font-bold text-lg">{{ topik.jumlahDinilai }} <span class="text-gray-500 text-sm">/ {{ stats.totalAnak }}</span></span>
+        <div v-for="topik in customTopics" :key="topik.nama" class="bg-[#0f172a] border border-gray-700 p-4 rounded-xl">
+          <h3 class="font-bold text-white mb-2 text-sm">{{ topik.nama }}</h3>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-gray-400">Dinilai:</span>
+            <span class="text-sky-400 font-bold">{{ topik.jumlahDinilai }} / {{ stats.totalAnak }}</span>
           </div>
-          <div class="w-full bg-gray-800 rounded-full h-2.5 mt-2">
-            <div class="bg-sky-500 h-2.5 rounded-full transition-all duration-500" :style="{ width: `${(topik.jumlahDinilai / (stats.totalAnak || 1)) * 100}%` }"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-else class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg mt-6">
-      <h2 class="text-lg font-bold text-teal-400 mb-4 flex items-center gap-2"><span>📖</span> Progres Hafalan Wajib (Kumulatif 7 Hari)</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl border-t-2 border-t-teal-500">
-          <h3 class="font-bold text-white mb-3 text-base">Hafalan Titah</h3>
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-400">Sudah Lulus:</span>
-            <span class="text-teal-400 font-bold text-lg">{{ stats.lulusTitah }} <span class="text-gray-500 text-sm">/ {{ stats.totalAnak }}</span></span>
-          </div>
-          <div class="w-full bg-gray-800 rounded-full h-2.5">
-            <div class="bg-teal-500 h-2.5 rounded-full transition-all duration-500" :style="{ width: `${(stats.lulusTitah / (stats.totalAnak || 1)) * 100}%` }"></div>
-          </div>
-        </div>
-
-        <div class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl border-t-2 border-t-teal-500">
-          <h3 class="font-bold text-white mb-3 text-base">Hata Haporseaon</h3>
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-400">Sudah Lulus:</span>
-            <span class="text-teal-400 font-bold text-lg">{{ stats.lulusHaporseaon }} <span class="text-gray-500 text-sm">/ {{ stats.totalAnak }}</span></span>
-          </div>
-          <div class="w-full bg-gray-800 rounded-full h-2.5">
-            <div class="bg-teal-500 h-2.5 rounded-full transition-all duration-500" :style="{ width: `${(stats.lulusHaporseaon / (stats.totalAnak || 1)) * 100}%` }"></div>
-          </div>
-        </div>
-
-        <div class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl border-t-2 border-t-teal-500">
-          <h3 class="font-bold text-white mb-3 text-base">Doa Bapa Kami</h3>
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-400">Sudah Lulus:</span>
-            <span class="text-teal-400 font-bold text-lg">{{ stats.lulusDoa }} <span class="text-gray-500 text-sm">/ {{ stats.totalAnak }}</span></span>
-          </div>
-          <div class="w-full bg-gray-800 rounded-full h-2.5">
-            <div class="bg-teal-500 h-2.5 rounded-full transition-all duration-500" :style="{ width: `${(stats.lulusDoa / (stats.totalAnak || 1)) * 100}%` }"></div>
+          <div class="w-full bg-gray-800 rounded-full h-2 mt-2">
+            <div class="bg-sky-500 h-2 rounded-full" :style="{ width: `${(topik.jumlahDinilai / (stats.totalAnak || 1)) * 100}%` }"></div>
           </div>
         </div>
       </div>
     </div>
 
+    <div v-else class="bg-[#151e32] rounded-2xl p-6 border border-gray-800 shadow-lg">
+      <h2 class="text-lg font-bold text-teal-400 mb-4 flex items-center gap-2"><span>📖</span> Progres Hafalan Wajib (Kelas 3-5)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl">
+          <h3 class="font-bold text-white mb-3">Hafalan Titah</h3>
+          <p class="text-teal-400 font-bold text-2xl mb-2">{{ stats.lulusTitah }} <span class="text-gray-500 text-sm">Anak Lulus</span></p>
+          <div class="w-full bg-gray-800 rounded-full h-2.5">
+            <div class="bg-teal-500 h-2.5 rounded-full transition-all" :style="{ width: `${(stats.lulusTitah / (stats.totalAnak || 1)) * 100}%` }"></div>
+          </div>
+        </div>
+        <div class="bg-[#0f172a] border border-gray-700 p-5 rounded-xl">
+          <h3 class="font-bold text-white mb-3">Hata Haporseaon</h3>
+          <p class="text-teal-400 font-bold text-2xl mb-2">{{ stats.lulusHaporseaon }} <span class="text-gray-500 text-sm">Anak Lulus</span></p>
+          <div class="w-full bg-gray-800 rounded-full h-2.5">
+            <div class="bg-teal-500 h-2.5 rounded-full transition-all" :style="{ width: `${(stats.lulusHaporseaon / (stats.totalAnak || 1)) * 100}%` }"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -109,93 +89,67 @@ import { supabase } from '../supabase'
 
 const currentUserEmail = ref('')
 const selectedDay = ref(1)
+const stats = ref({ totalAnak: 0, hadirHariIni: 0, lulusTitah: 0, lulusHaporseaon: 0 })
+const customTopics = ref([])
 
-const stats = ref({
-  totalAnak: 0,
-  hadirHariIni: 0,
-  lulusTitah: 0,
-  lulusHaporseaon: 0,
-  lulusDoa: 0
-})
-
-const customTopics = ref([]) 
-
-// === KUNCI PERBAIKAN: Identifikasi User yang lebih fleksibel ===
-// Jika di dalam email mengandung kata "samuel", langsung anggap itu Bang Samuel!
-const isSamuel = computed(() => {
-  return currentUserEmail.value.toLowerCase().includes('samuel')
-})
-
+// === LOGIKA DETEKSI USER (Sama Persis dengan App.vue) ===
+const isSamuel = computed(() => currentUserEmail.value === 'samuelmt@gmail.com')
 const targetKelas = computed(() => isSamuel.value ? 'Kelas 6-7' : 'Kelas 3-5')
 const targetFilter = computed(() => isSamuel.value ? [6, 7] : [3, 4, 5])
 
 const dynamicUserName = computed(() => {
-  if (!currentUserEmail.value) return 'Memuat...'
+  if (!currentUserEmail.value) return 'Admin'
   const namePart = currentUserEmail.value.split('@')[0]
   return namePart.charAt(0).toUpperCase() + namePart.slice(1)
 })
 
 const fetchDashboardData = async () => {
-  // 1. Ambil Data Anak
+  if (!currentUserEmail.value) return
+
+  // 1. Ambil Data Anak sesuai hak akses
   const { data: students } = await supabase.from('students').select('id').in('kelas', targetFilter.value)
   if (!students) return
-
   const studentIds = students.map(s => s.id)
   stats.value.totalAnak = students.length
 
-  // 2. Hitung Kehadiran Tepat Waktu
-  const { data: attendance } = await supabase
-    .from('attendance')
-    .select('id')
-    .eq('hari', selectedDay.value)
-    .in('student_id', studentIds)
-    .eq('status', 'Tepat Waktu')
-  
+  // 2. Hitung Kehadiran
+  const { data: attendance } = await supabase.from('attendance')
+    .select('id').eq('hari', selectedDay.value).in('student_id', studentIds).eq('status', 'Tepat Waktu')
   stats.value.hadirHariIni = attendance ? attendance.length : 0
 
-  // 3. Tarik Data Penilaian sesuai User
+  // 3. Tarik Data Penilaian
   if (isSamuel.value) {
-    // --- LOGIKA SAMUEL: Hitung topik kustom per hari ---
-    const { data: hafalan } = await supabase
-      .from('hafalan')
-      .select('jenis_hafalan, status_nilai')
-      .in('student_id', studentIds)
-      .eq('hari', selectedDay.value)
-      
+    const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan').in('student_id', studentIds).eq('hari', selectedDay.value)
     if (hafalan) {
-      const forbidden = ['Titah', 'Hata Haporseaon', 'Doa Bapa Kami']
-      const filteredHafalan = hafalan.filter(h => !forbidden.includes(h.jenis_hafalan) && h.status_nilai && h.status_nilai !== 'Belum')
-
       const topicCounts = {}
-      filteredHafalan.forEach(h => {
+      hafalan.filter(h => !['Titah', 'Hata Haporseaon'].includes(h.jenis_hafalan)).forEach(h => {
         topicCounts[h.jenis_hafalan] = (topicCounts[h.jenis_hafalan] || 0) + 1
       })
-      
-      customTopics.value = Object.keys(topicCounts).map(key => ({
-        nama: key,
-        jumlahDinilai: topicCounts[key]
-      }))
+      customTopics.value = Object.keys(topicCounts).map(key => ({ nama: key, jumlahDinilai: topicCounts[key] }))
     }
   } else {
-    // --- LOGIKA ALI: Hitung Hafalan ---
-    const { data: hafalan } = await supabase
-      .from('hafalan')
-      .select('jenis_hafalan')
-      .in('student_id', studentIds)
-      
+    const { data: hafalan } = await supabase.from('hafalan').select('jenis_hafalan').in('student_id', studentIds)
     if (hafalan) {
       stats.value.lulusTitah = hafalan.filter(h => h.jenis_hafalan === 'Titah').length
       stats.value.lulusHaporseaon = hafalan.filter(h => h.jenis_hafalan === 'Hata Haporseaon').length
-      stats.value.lulusDoa = hafalan.filter(h => h.jenis_hafalan === 'Doa Bapa Kami').length
     }
   }
 }
 
-onMounted(async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    currentUserEmail.value = user.email
-    await fetchDashboardData()
-  }
+onMounted(() => {
+  // Samakan cara ambil email dengan App.vue
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session?.user) {
+      currentUserEmail.value = data.session.user.email.toLowerCase()
+      fetchDashboardData()
+    }
+  })
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      currentUserEmail.value = session.user.email.toLowerCase()
+      fetchDashboardData()
+    }
+  })
 })
 </script>
