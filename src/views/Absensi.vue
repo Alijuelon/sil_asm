@@ -3,7 +3,7 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-white">Input & Rekap Absensi</h1>
-        <p class="text-sm text-gray-400 mt-1">Sistem Absensi Otomatis (Auto-Save)</p>
+        <p class="text-sm text-gray-400 mt-1">Sistem Absensi Otomatis sesuai format rekap panitia</p>
       </div>
     </div>
 
@@ -13,7 +13,7 @@
         <select 
           v-model="selectedDay" 
           @change="fetchStudents"
-          class="bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition"
+          class="bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition font-bold"
         >
           <option v-for="day in 7" :key="day" :value="day">Hari {{ day }}</option>
         </select>
@@ -43,7 +43,7 @@
             <span class="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredLeft.length }} Anak</span>
           </div>
           <button @click="markAllOnTime('left')" class="text-xs bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1 font-bold">
-            ✅ Hadir Semua
+            ✅ Hadir Tepat Waktu Semua
           </button>
         </div>
 
@@ -52,32 +52,35 @@
             <thead>
               <tr class="border-b border-gray-800 text-gray-400">
                 <th class="pb-3 font-medium px-2">Nama Lengkap</th>
-                <th class="pb-3 font-medium px-2 w-16">Kelas</th>
-                <th class="pb-3 font-medium px-2 w-48">Status (Auto-Save)</th>
+                <th class="pb-3 font-medium px-2 w-16 text-center">Kelas</th>
+                <th class="pb-3 font-medium px-2 w-48">Status Kehadiran</th>
+                <th class="pb-3 font-medium px-2 w-12 text-center">Skor</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="paginatedLeft.length === 0">
-                <td colspan="3" class="text-center py-6 text-gray-500">Tidak ada data.</td>
+                <td colspan="4" class="text-center py-6 text-gray-500">Tidak ada data.</td>
               </tr>
               <tr v-for="student in paginatedLeft" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
                 <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
-                <td class="py-3 px-2"><span class="text-blue-400 font-bold">{{ student.kelas }}</span></td>
+                <td class="py-3 px-2 text-center"><span class="text-blue-400 font-bold bg-blue-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                 <td class="py-3 px-2">
-                  <select v-model="student.status" @change="saveAttendance(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                    <option value="">-- Status --</option>
-                    <option value="Tepat Waktu">Tepat Waktu</option>
-                    <option value="Telat <5m">Telat &lt; 5m</option>
-                    <option value="Telat >5m">Telat &gt; 5m</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Tanpa Izin">Tanpa Izin</option>
+                  <select v-model="student.status" @change="saveAttendance(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Tepat Waktu">Tepat Waktu (100)</option>
+                    <option value="Telat <5m">Telat &lt; 5m (95)</option>
+                    <option value="Telat >5m">Telat &gt; 5m (90)</option>
+                    <option value="Sakit">Sakit (70)</option>
+                    <option value="Izin">Izin (50)</option>
+                    <option value="Tanpa Izin">Tanpa Izin (0)</option>
                   </select>
                 </td>
+                <td class="py-3 px-2 text-center font-bold text-teal-400">{{ student.status ? getSkor(student.status) : '-' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
+        
         <div class="mt-4 flex items-center justify-between border-t border-gray-800 pt-4">
           <button @click="pageLeft--" :disabled="pageLeft === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
           <span class="text-xs text-gray-500">Hal {{ pageLeft }} dari {{ totalPagesLeft || 1 }}</span>
@@ -92,7 +95,7 @@
             <span class="text-xs bg-sky-900/50 text-sky-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredRight.length }} Anak</span>
           </div>
           <button @click="markAllOnTime('right')" class="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1 font-bold">
-            ✅ Hadir Semua
+            ✅ Hadir Tepat Waktu Semua
           </button>
         </div>
 
@@ -101,32 +104,35 @@
             <thead>
               <tr class="border-b border-gray-800 text-gray-400">
                 <th class="pb-3 font-medium px-2">Nama Lengkap</th>
-                <th class="pb-3 font-medium px-2 w-16">Kelas</th>
-                <th class="pb-3 font-medium px-2 w-48">Status (Auto-Save)</th>
+                <th class="pb-3 font-medium px-2 w-16 text-center">Kelas</th>
+                <th class="pb-3 font-medium px-2 w-48">Status Kehadiran</th>
+                <th class="pb-3 font-medium px-2 w-12 text-center">Skor</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="paginatedRight.length === 0">
-                <td colspan="3" class="text-center py-6 text-gray-500">Tidak ada data.</td>
+                <td colspan="4" class="text-center py-6 text-gray-500">Tidak ada data.</td>
               </tr>
               <tr v-for="student in paginatedRight" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
                 <td class="py-3 px-2 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
-                <td class="py-3 px-2"><span class="text-sky-400 font-bold">{{ student.kelas }}</span></td>
+                <td class="py-3 px-2 text-center"><span class="text-sky-400 font-bold bg-sky-900/30 px-2 py-1 rounded">Kls {{ student.kelas }}</span></td>
                 <td class="py-3 px-2">
-                  <select v-model="student.status" @change="saveAttendance(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-sky-500 focus:outline-none text-xs transition">
-                    <option value="">-- Status --</option>
-                    <option value="Tepat Waktu">Tepat Waktu</option>
-                    <option value="Telat <5m">Telat &lt; 5m</option>
-                    <option value="Telat >5m">Telat &gt; 5m</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Tanpa Izin">Tanpa Izin</option>
+                  <select v-model="student.status" @change="saveAttendance(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-1.5 text-white focus:border-sky-500 focus:outline-none text-xs transition">
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Tepat Waktu">Tepat Waktu (100)</option>
+                    <option value="Telat <5m">Telat &lt; 5m (95)</option>
+                    <option value="Telat >5m">Telat &gt; 5m (90)</option>
+                    <option value="Sakit">Sakit (70)</option>
+                    <option value="Izin">Izin (50)</option>
+                    <option value="Tanpa Izin">Tanpa Izin (0)</option>
                   </select>
                 </td>
+                <td class="py-3 px-2 text-center font-bold text-sky-400">{{ student.status ? getSkor(student.status) : '-' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
+        
         <div class="mt-4 flex items-center justify-between border-t border-gray-800 pt-4">
           <button @click="pageRight--" :disabled="pageRight === 1" class="px-3 py-1 rounded bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm">Prev</button>
           <span class="text-xs text-gray-500">Hal {{ pageRight }} dari {{ totalPagesRight || 1 }}</span>
@@ -136,10 +142,7 @@
 
     </div>
 
-    <div 
-      v-if="toastMsg" 
-      class="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform transition-all z-50 font-bold"
-    >
+    <div v-if="toastMsg" class="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform transition-all z-50 font-bold">
       <span>💾</span> {{ toastMsg }}
     </div>
 
@@ -169,6 +172,19 @@ const showToast = (message) => {
   }, 2000)
 }
 
+// === RUMUS SKOR SESUAI GAMBAR ===
+const getSkor = (status) => {
+  switch (status) {
+    case 'Tepat Waktu': return 100
+    case 'Telat <5m': return 95
+    case 'Telat >5m': return 90
+    case 'Sakit': return 70
+    case 'Izin': return 50
+    case 'Tanpa Izin': return 0
+    default: return 0
+  }
+}
+
 // === FUNGSI MENGAMBIL DATA ===
 const fetchStudents = async () => {
   pageLeft.value = 1
@@ -189,15 +205,13 @@ const fetchStudents = async () => {
   }
 }
 
-onMounted(() => {
-  fetchStudents()
-})
+onMounted(() => fetchStudents())
 
 const toggleSort = () => {
   sortDesc.value = !sortDesc.value
 }
 
-// === FILTER KELAS ===
+// === FILTER KELAS & PAGINASI ===
 const filteredLeft = computed(() => {
   let filtered = allStudents.value.filter(s => [3, 4, 5].includes(s.kelas))
   return filtered.sort((a, b) => sortDesc.value ? b.kelas - a.kelas : a.kelas - b.kelas)
@@ -219,41 +233,35 @@ const paginatedRight = computed(() => {
 })
 
 
-// === FUNGSI AUTO-SAVE ===
-const getSkor = (status) => {
-  if (status === 'Tepat Waktu') return 100
-  if (status === 'Telat <5m') return 95
-  if (status === 'Telat >5m') return 90
-  if (status === 'Sakit') return 70
-  if (status === 'Izin') return 50
-  return 0
-}
-
+// === FUNGSI AUTO-SAVE KE SUPABASE ===
 const saveAttendance = async (student, isSilent = false) => {
   if (!student.status) return
   
+  const skor = getSkor(student.status)
   const payload = { 
     student_id: student.id, 
     hari: selectedDay.value, 
     status: student.status, 
-    skor: getSkor(student.status) 
+    skor: skor 
   }
 
   // Jika murid sudah pernah di-absen sebelumnya (Update)
   if (student.attendance_id) {
-    await supabase.from('attendance').update(payload).eq('id', student.attendance_id)
+    const { error } = await supabase.from('attendance').update(payload).eq('id', student.attendance_id)
+    if (error) console.error("Error Update Absen:", error)
   } 
   // Jika belum pernah diabsen (Insert)
   else {
-    const { data } = await supabase.from('attendance').insert(payload).select()
+    const { data, error } = await supabase.from('attendance').insert(payload).select()
+    if (error) console.error("Error Insert Absen:", error)
     if (data && data.length > 0) student.attendance_id = data[0].id
   }
 
   // Tampilkan toast jika bukan proses batch (tandai semua)
-  if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap}`)
+  if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (${skor} pt)`)
 }
 
-// === FUNGSI TANDAI SEMUA HADIR ===
+// === FUNGSI TANDAI TEPAT WAKTU SEMUA ===
 const markAllOnTime = async (section) => {
   const listToUpdate = section === 'left' ? filteredLeft.value : filteredRight.value
   
@@ -263,10 +271,10 @@ const markAllOnTime = async (section) => {
       await saveAttendance(student, true) // isSilent = true
     }
   }
-  showToast(`Semua anak kelas ${section === 'left' ? '3-5' : '6-7'} berhasil ditandai hadir!`)
+  showToast(`Semua anak kelas ${section === 'left' ? '3-5' : '6-7'} ditandai Tepat Waktu!`)
 }
 
-// === FUNGSI EXPORT PDF DINAMIS (VERSI VITE AMAN) ===
+// === FUNGSI EXPORT PDF DINAMIS ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF() 
   
@@ -296,19 +304,14 @@ const exportToPDF = (mode) => {
       headStyles: { fillColor: [20, 184, 166] }
     })
 
-    // Update currentY agar tabel berikutnya berada di bawah tabel ini (jika mode 'all')
     currentY = doc.lastAutoTable.finalY + 15 
   }
 
   // Render Tabel Kanan (Kelas 6-7)
   if (mode === 'all' || mode === 'right') {
-    
-    // Jika hanya klik 'right', paksa posisi teks mulai dari atas
     if (mode === 'right') {
       currentY = 25 
-    } 
-    // Jika mode 'all', pastikan sisa halamannya cukup. Jika mepet batas bawah (>270), buat halaman baru.
-    else if (currentY > 270) {
+    } else if (currentY > 270) {
       doc.addPage()
       currentY = 15
     }
@@ -332,18 +335,9 @@ const exportToPDF = (mode) => {
     })
   }
 
-  // Menyiapkan penamaan file (opsional jika dibutuhkan saat save manual dari viewer browser)
-  let fileName = `Absensi_SIL_Hari_${selectedDay.value}`
-  if (mode === 'left') fileName += `_Kls3-5`
-  else if (mode === 'right') fileName += `_Kls6-7`
-  else fileName += `_SemuaKelas`
-  
   // === PREVIEW MODE: Buka PDF di Tab Baru ===
-  // Mengubah data PDF menjadi format Blob agar bisa di-preview di browser
   const pdfBlob = doc.output('blob')
   const pdfUrl = URL.createObjectURL(pdfBlob)
-  
-  // Membuka tab baru yang berisi tampilan PDF (Bisa print/download dari sini)
   window.open(pdfUrl, '_blank')
 }
 </script>

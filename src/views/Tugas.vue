@@ -3,7 +3,7 @@
     <div class="flex justify-between items-end mb-2">
       <div>
         <h1 class="text-2xl font-bold text-white">Wali Kelas Review</h1>
-        <p class="text-sm text-gray-400 mt-1">Review Komik & Tugas Harian (Khusus Kelas 3-5)</p>
+        <p class="text-sm text-gray-400 mt-1">Sistem Penilaian 4 Kategori (Khusus Kelas 3-5)</p>
       </div>
     </div>
 
@@ -13,7 +13,7 @@
         <select 
           v-model="selectedDay" 
           @change="fetchStudents"
-          class="bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition"
+          class="bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition font-bold"
         >
           <option v-for="day in 7" :key="day" :value="day">Hari {{ day }}</option>
         </select>
@@ -48,47 +48,67 @@
         </button>
       </div>
 
-      <div class="overflow-x-auto flex-1">
-        <table class="w-full text-left text-sm">
+      <div class="overflow-x-auto flex-1 custom-scrollbar pb-4">
+        <table class="w-full text-left text-sm whitespace-nowrap">
           <thead>
             <tr class="border-b border-gray-800 text-gray-400 bg-[#0f172a]">
-              <th class="p-3 font-medium rounded-tl-lg w-12">No</th>
-              <th class="p-3 font-medium">Nama Lengkap</th>
-              <th class="p-3 font-medium text-center w-20">Kelas</th>
-              <th class="p-3 font-medium w-48">Review Komik</th>
-              <th class="p-3 font-medium w-48">Tugas Harian</th>
-              <th class="p-3 font-medium text-center w-24 rounded-tr-lg">Rerata Skor</th>
+              <th class="p-3 font-medium rounded-tl-lg w-10">No</th>
+              <th class="p-3 font-medium min-w-[150px]">Nama Lengkap</th>
+              <th class="p-3 font-medium text-center">Kelas</th>
+              <th class="p-3 font-medium min-w-[130px]">Tugas Harian</th>
+              <th class="p-3 font-medium min-w-[130px]">Reviu Bacaan</th>
+              <th class="p-3 font-medium min-w-[130px]">Kuis / Extra</th>
+              <th class="p-3 font-medium min-w-[130px]">Reviu Tontonan</th>
+              <th class="p-3 font-medium text-center rounded-tr-lg">Rerata</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="paginatedStudents.length === 0">
-              <td colspan="6" class="text-center py-8 text-gray-500">Tidak ada data kelas 3-5.</td>
+              <td colspan="8" class="text-center py-8 text-gray-500">Tidak ada data kelas 3-5.</td>
             </tr>
             <tr v-for="(student, index) in paginatedStudents" :key="student.id" class="border-b border-gray-800/50 hover:bg-[#1e293b] transition">
               <td class="p-3 text-gray-500">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
-              <td class="p-3 text-gray-200 font-medium truncate max-w-[150px]">{{ student.nama_lengkap }}</td>
+              <td class="p-3 text-gray-200 font-medium truncate max-w-[180px]" :title="student.nama_lengkap">{{ student.nama_lengkap }}</td>
               <td class="p-3 text-center"><span class="text-blue-400 font-bold bg-blue-900/30 px-2 py-1 rounded border border-blue-800">Kls {{ student.kelas }}</span></td>
               
               <td class="p-3">
-                <select v-model="student.status_komik" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum Dinilai</option>
-                  <option value="A">Nilai A (95)</option>
-                  <option value="B">Nilai B (85)</option>
-                  <option value="C">Nilai C (70)</option>
+                <select v-model="student.tugas_harian" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                  <option value="Belum">Belum</option>
+                  <option value="A">A (95)</option>
+                  <option value="B">B (85)</option>
+                  <option value="C">C (70)</option>
                 </select>
               </td>
               
               <td class="p-3">
-                <select v-model="student.status_tugas" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
-                  <option value="Belum">Belum Dinilai</option>
-                  <option value="A">Nilai A (95)</option>
-                  <option value="B">Nilai B (85)</option>
-                  <option value="C">Nilai C (70)</option>
+                <select v-model="student.reviu_bacaan" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                  <option value="Belum">Belum</option>
+                  <option value="A">A (95)</option>
+                  <option value="B">B (85)</option>
+                  <option value="C">C (70)</option>
                 </select>
               </td>
 
-              <td class="p-3 text-center font-bold text-teal-400 text-base">
-                {{ calculateDailyScore(student.status_komik, student.status_tugas) }}
+              <td class="p-3">
+                <select v-model="student.kuis" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                  <option value="Belum">Belum</option>
+                  <option value="A">A (95)</option>
+                  <option value="B">B (85)</option>
+                  <option value="C">C (70)</option>
+                </select>
+              </td>
+
+              <td class="p-3">
+                <select v-model="student.reviu_tontonan" @change="saveTugas(student)" class="w-full bg-[#0f172a] border border-gray-700 rounded p-2 text-white focus:border-teal-500 focus:outline-none text-xs transition">
+                  <option value="Belum">Belum</option>
+                  <option value="A">A (95)</option>
+                  <option value="B">B (85)</option>
+                  <option value="C">C (70)</option>
+                </select>
+              </td>
+
+              <td class="p-3 text-center font-bold text-teal-400 text-base bg-[#0f172a]/50">
+                {{ calculateDailyScore(student.tugas_harian, student.reviu_bacaan, student.kuis, student.reviu_tontonan) }}
               </td>
             </tr>
           </tbody>
@@ -129,22 +149,19 @@ const showToast = (message) => {
 }
 
 // === HITUNG SKOR BERDASARKAN HURUF ===
-// A = 95, B = 85, C = 70
 const getPoint = (grade) => {
   if (grade === 'A') return 95
   if (grade === 'B') return 85
   if (grade === 'C') return 70
-  return 0
+  return 0 // Jika 'Belum', poin 0
 }
 
-const calculateDailyScore = (komik, tugas) => {
-  if (komik === 'Belum' && tugas === 'Belum') return 0
+const calculateDailyScore = (tugas, bacaan, kuis, tontonan) => {
+  if (tugas === 'Belum' && bacaan === 'Belum' && kuis === 'Belum' && tontonan === 'Belum') return 0
   
-  const pKomik = getPoint(komik)
-  const pTugas = getPoint(tugas)
-  
-  // Mencari Rata-rata dari 2 penugasan
-  return Math.round((pKomik + pTugas) / 2)
+  const totalPoints = getPoint(tugas) + getPoint(bacaan) + getPoint(kuis) + getPoint(tontonan)
+  // Dibagi 4 sesuai jumlah kategori
+  return Math.round(totalPoints / 4)
 }
 
 // === FUNGSI MENGAMBIL DATA KHUSUS KELAS 3-5 ===
@@ -163,14 +180,16 @@ const fetchStudents = async () => {
     .select('*')
     .eq('hari', selectedDay.value)
 
-  if (err2) console.warn("Tabel tugas bermasalah/belum diupdate.", err2)
+  if (err2) console.warn("Tabel tugas bermasalah.", err2)
 
   allStudents.value = students.map(student => {
     const existingTugas = tugasDB?.find(t => t.student_id === student.id)
     return {
       ...student,
-      status_komik: existingTugas?.status_komik || 'Belum',
-      status_tugas: existingTugas?.status_tugas || 'Belum',
+      tugas_harian: existingTugas?.tugas_harian || 'Belum',
+      reviu_bacaan: existingTugas?.reviu_bacaan || 'Belum',
+      kuis: existingTugas?.kuis || 'Belum',
+      reviu_tontonan: existingTugas?.reviu_tontonan || 'Belum',
       tugas_id: existingTugas?.id || null
     }
   })
@@ -182,7 +201,6 @@ const toggleSort = () => {
   sortDesc.value = !sortDesc.value
 }
 
-// === FILTER & PAGINASI ===
 const filteredStudents = computed(() => {
   let filtered = [...allStudents.value]
   return filtered.sort((a, b) => sortDesc.value ? b.kelas - a.kelas : a.kelas - b.kelas)
@@ -195,15 +213,17 @@ const paginatedStudents = computed(() => {
   return filteredStudents.value.slice(start, start + itemsPerPage)
 })
 
-// === FUNGSI AUTO-SAVE ===
+// === FUNGSI AUTO-SAVE (MENGIRIM 4 KOLOM BARU) ===
 const saveTugas = async (student, isSilent = false) => {
-  const skor = calculateDailyScore(student.status_komik, student.status_tugas)
+  const skor = calculateDailyScore(student.tugas_harian, student.reviu_bacaan, student.kuis, student.reviu_tontonan)
   
   const payload = { 
     student_id: student.id, 
     hari: selectedDay.value, 
-    status_komik: student.status_komik, 
-    status_tugas: student.status_tugas, 
+    tugas_harian: student.tugas_harian, 
+    reviu_bacaan: student.reviu_bacaan, 
+    kuis: student.kuis, 
+    reviu_tontonan: student.reviu_tontonan, 
     skor_harian: skor 
   }
 
@@ -211,13 +231,13 @@ const saveTugas = async (student, isSilent = false) => {
     const { error } = await supabase.from('tugas').update(payload).eq('id', student.tugas_id)
     if (error) {
       console.error("Gagal Update:", error)
-      return alert("Gagal menyimpan data!")
+      return alert("Gagal menyimpan data! Pastikan SQL Alter Table sudah dijalankan.")
     }
   } else {
     const { data, error } = await supabase.from('tugas').insert(payload).select()
     if (error) {
       console.error("Gagal Insert:", error)
-      return alert("Gagal menyimpan data baru!")
+      return alert("Gagal menyimpan data baru! Pastikan SQL Alter Table sudah dijalankan.")
     }
     if (data && data.length > 0) student.tugas_id = data[0].id
   }
@@ -225,59 +245,53 @@ const saveTugas = async (student, isSilent = false) => {
   if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (Rerata: ${skor})`)
 }
 
-// === TANDAI NILAI "A" SEMUA ===
+// === TANDAI NILAI "A" SEMUA (4 KOLOM) ===
 const markAllA = async () => {
   for (let student of filteredStudents.value) {
     let changed = false
-    if (student.status_komik !== 'A') { student.status_komik = 'A'; changed = true }
-    if (student.status_tugas !== 'A') { student.status_tugas = 'A'; changed = true }
+    if (student.tugas_harian !== 'A') { student.tugas_harian = 'A'; changed = true }
+    if (student.reviu_bacaan !== 'A') { student.reviu_bacaan = 'A'; changed = true }
+    if (student.kuis !== 'A') { student.kuis = 'A'; changed = true }
+    if (student.reviu_tontonan !== 'A') { student.reviu_tontonan = 'A'; changed = true }
     
     if (changed) await saveTugas(student, true)
   }
   showToast(`Semua anak Kelas 3-5 diberi Nilai A!`)
 }
 
-// === FUNGSI BANTUAN TANGGAL CETAK ===
+// === EXPORT PDF ===
 const getTanggalCetak = () => {
   return new Date().toLocaleDateString('id-ID', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
 }
 const formatTanggalFile = new Date().toISOString().split('T')[0] 
-// === EXPORT 1: PDF HARIAN (DENGAN PREVIEW TAB BARU) ===
+
 const exportDailyPDF = () => {
-  const doc = new jsPDF()
+  const doc = new jsPDF('landscape') // Landscape agar 4 kolom muat dengan lega
   doc.setFontSize(16)
   doc.text(`Laporan Wali Kelas Review - Hari ${selectedDay.value}`, 14, 15)
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
   doc.text(`Kategori: Kelas 3 - 5 | Dicetak pada: ${getTanggalCetak()} WIB`, 14, 22)
   
-  doc.setFontSize(12)
-  doc.setTextColor(0, 0, 0)
-  
   const bodyData = filteredStudents.value.map((s, idx) => [
-    idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, s.status_komik, s.status_tugas, calculateDailyScore(s.status_komik, s.status_tugas)
+    idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, 
+    s.tugas_harian, s.reviu_bacaan, s.kuis, s.reviu_tontonan, 
+    calculateDailyScore(s.tugas_harian, s.reviu_bacaan, s.kuis, s.reviu_tontonan)
   ])
   
   autoTable(doc, {
     startY: 28,
-    head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Komik', 'Nilai Tugas', 'Rerata Harian']],
+    head: [['No', 'Nama Lengkap', 'Kelas', 'Tugas Harian', 'Reviu Bacaan', 'Kuis', 'Reviu Tontonan', 'Rerata']],
     body: bodyData,
     theme: 'grid',
     headStyles: { fillColor: [20, 184, 166] }
   })
   
-  // Penamaan file jika di-download manual
-  const fileName = `WaliKelas_Hari_${selectedDay.value}_${formatTanggalFile}`
-  
-  // === PREVIEW MODE: Buka PDF di Tab Baru ===
-  const pdfBlob = doc.output('blob')
-  const pdfUrl = URL.createObjectURL(pdfBlob)
-  window.open(pdfUrl, '_blank')
+  window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 
-// === EXPORT 2: PDF REKAP 7 HARI (DENGAN PREVIEW TAB BARU) ===
 const exportFinal7DaysPDF = async () => {
   const { data: allTugas } = await supabase.from('tugas').select('*')
   
@@ -292,8 +306,6 @@ const exportFinal7DaysPDF = async () => {
     const tugasAnak = allTugas?.filter(t => t.student_id === s.id) || []
     let totalSkor = 0
     tugasAnak.forEach(t => totalSkor += t.skor_harian)
-    
-    // Rata-rata dari 7 hari kegiatan
     const rerataAkhir = Math.round(totalSkor / 7)
     
     return [idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, totalSkor.toString(), rerataAkhir]
@@ -308,12 +320,14 @@ const exportFinal7DaysPDF = async () => {
     columnStyles: { 4: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } }
   })
   
-  // Penamaan file jika di-download manual
-  const fileName = `Laporan_WaliKelas_7Hari_${formatTanggalFile}`
-  
-  // === PREVIEW MODE: Buka PDF di Tab Baru ===
-  const pdfBlob = doc.output('blob')
-  const pdfUrl = URL.createObjectURL(pdfBlob)
-  window.open(pdfUrl, '_blank')
+  window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 </script>
+
+<style scoped>
+/* Agar tabel bisa di-scroll dengan mulus di HP */
+.custom-scrollbar::-webkit-scrollbar { height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+.custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #334155; }
+</style>
