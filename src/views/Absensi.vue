@@ -7,43 +7,47 @@
       </div>
     </div>
 
-    <div class="bg-[#151e32] border border-gray-800 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden gap-5">
       
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <label class="font-medium text-gray-400 text-sm whitespace-nowrap">Hari Kegiatan:</label>
-          <select 
-            v-model="selectedDay" 
-            @change="fetchStudents"
-            class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition font-bold"
-          >
-            <option v-for="day in 7" :key="day" :value="day">Hari {{ day }}</option>
-          </select>
-        </div>
-        
-        <button 
-          @click="toggleSort" 
-          class="w-full sm:w-auto bg-[#0f172a] border border-gray-700 text-gray-300 px-4 py-2.5 rounded-lg hover:bg-gray-800 transition flex items-center justify-center gap-2"
-        >
-          <span class="text-sm">↕️ Urutkan: </span>
-          <span class="font-bold text-teal-400">{{ sortDesc ? 'Kelas Besar-Kecil' : 'Kelas Kecil-Besar' }}</span>
-        </button>
-      </div>
-
-      <button @click="exportToPDF" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg transition shadow-lg text-sm font-medium whitespace-nowrap flex items-center justify-center gap-2">
-        📄 Cetak Absen (H{{ selectedDay }})
-      </button>
-    </div>
-
-    <div class="bg-[#151e32] border border-gray-800 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col w-full overflow-hidden">
-      <div class="border-b border-gray-800 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-800 pb-3">
         <div>
           <h2 class="text-lg font-bold text-teal-400">👦👧 Daftar Anak Kelas 3 - 5</h2>
-          <span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded mt-1 inline-block">Total: {{ filteredStudents.length }} Anak</span>
+          <span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded mt-1 inline-block border border-teal-800/50">Total: {{ filteredStudents.length }} Anak</span>
         </div>
-        <button @click="markAllOnTime" class="w-full sm:w-auto text-xs bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg shadow transition flex items-center justify-center gap-2 font-bold">
-          ✅ Hadir Tepat Waktu Semua
-        </button>
+      </div>
+
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label class="font-medium text-gray-400 text-sm whitespace-nowrap">Hari:</label>
+            <select 
+              v-model="selectedDay" 
+              @change="fetchStudents"
+              class="flex-1 sm:flex-none bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-teal-500 focus:outline-none transition font-bold text-sm"
+            >
+              <option v-for="day in 7" :key="day" :value="day">Hari {{ day }}</option>
+            </select>
+          </div>
+          
+          <button 
+            @click="toggleSort" 
+            class="w-full sm:w-auto bg-[#0f172a] border border-gray-700 text-gray-300 px-4 py-2.5 rounded-lg hover:bg-gray-800 transition flex items-center justify-center gap-2"
+          >
+            <span class="text-sm">↕️ Urutkan: </span>
+            <span class="font-bold text-teal-400 text-sm">{{ sortDesc ? 'Besar ke Kecil' : 'Kecil ke Besar' }}</span>
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
+          <button @click="markAllOnTime" class="w-full sm:w-auto bg-teal-900/40 hover:bg-teal-900/80 border border-teal-700 text-teal-300 px-4 py-2.5 rounded-lg transition flex items-center justify-center gap-2 text-sm font-bold">
+            ✅ Hadir Tepat Waktu Semua
+          </button>
+          
+          <button @click="exportToPDF" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg transition shadow-lg text-sm font-bold whitespace-nowrap flex items-center justify-center gap-2">
+            📄 Cetak Absen (H{{ selectedDay }})
+          </button>
+        </div>
       </div>
 
       <div class="overflow-x-auto custom-scrollbar flex-1 pb-2">
@@ -82,7 +86,7 @@
         </table>
       </div>
       
-      <div class="mt-4 flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
+      <div class="flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 gap-2">
         <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm font-medium">Sebelumnya</button>
         <span class="text-sm text-gray-500 font-medium">Halaman {{ currentPage }} dari {{ totalPages || 1 }}</span>
         <button @click="currentPage++" :disabled="currentPage === totalPages || totalPages === 0" class="px-3 py-1.5 rounded-lg bg-[#0f172a] border border-gray-700 hover:bg-gray-800 disabled:opacity-50 text-sm font-medium">Selanjutnya</button>
@@ -131,21 +135,32 @@ const getSkor = (status) => {
 const fetchStudents = async () => {
   currentPage.value = 1
   
-  // 1. Tarik HANYA murid kelas 3, 4, 5
-  const { data: students, error: err1 } = await supabase.from('students').select('*').in('kelas', [3, 4, 5])
-  if (err1) return console.error(err1)
+  // 1. Tarik HANYA murid kelas 3, 4, dan 5
+  const { data: students, error: err1 } = await supabase
+    .from('students')
+    .select('*')
+    .in('kelas', [3, 4, 5]) // Pastikan ini hanya mengambil array angka kelas tersebut
 
-  // 2. Ambil ID murid-murid tersebut
+  if (err1) {
+    console.error("Gagal mengambil data murid:", err1)
+    return
+  }
+
+  // 2. Ambil ID murid-murid tersebut untuk mencocokkan absennya
   const studentIds = students.map(s => s.id)
 
-  // 3. Tarik HANYA data absensi milik ID murid tersebut (Aman dari data Bang Samuel)
+  // 3. Tarik HANYA data absensi milik ID murid tersebut (Aman dari data kelas lain)
   const { data: attendance, error: err2 } = await supabase
     .from('attendance')
     .select('*')
     .eq('hari', selectedDay.value)
-    .in('student_id', studentIds) // <--- Ini Pagar Pengamannya!
+    .in('student_id', studentIds)
 
-  if (!err2) {
+  if (err2) {
+    console.error("Gagal mengambil data absensi:", err2)
+  }
+
+  if (!err1 && !err2) {
     allStudents.value = students.map(student => {
       const existingAbsen = attendance?.find(a => a.student_id === student.id)
       return {
@@ -225,7 +240,7 @@ const exportToPDF = () => {
     head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Kehadiran']], 
     body: bodyData,
     theme: 'grid',
-    headStyles: { fillColor: [20, 184, 166] }, // Tema warna Teal Kak Ali
+    headStyles: { fillColor: [20, 184, 166] }, // Warna Teal
     columnStyles: {
       0: { halign: 'center' },
       2: { halign: 'center' },
