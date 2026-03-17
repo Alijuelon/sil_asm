@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { supabase } from "../supabase";
 
 // Import semua komponen
-import LandingPage from "../views/LandingPage.vue"; // KOMPONEN BARU KITA 🚀
+import LandingPage from "../views/LandingPage.vue"; 
 import Dashboard from "../views/Dashboard.vue";
 import Absensi from "../views/Absensi.vue";
 import Penilaian from "../views/Penilaian.vue";
@@ -11,10 +11,14 @@ import LaporanAkhir from "../views/LaporanAkhir.vue";
 import Login from "../views/Login.vue";
 import KelolaASM from "../views/KelolaASM.vue";
 import Tugas from "../views/Tugas.vue";
-import WaliKelas67 from '../views/WaliKelas67.vue'
+
+// Import Komponen Khusus Bang Samuel
+import WaliKelas67 from "../views/WaliKelas67.vue"; 
+import AbsensiSamuel from '../views/AbsensiSamuel.vue';
+import PenilaianSamuel from '../views/PenilaianSamuel.vue';
 
 const routes = [
-  // Rute Publik
+  // === RUTE PUBLIK ===
   { 
     path: "/", 
     name: "LandingPage", 
@@ -26,7 +30,7 @@ const routes = [
     component: Login 
   },
   
-  // Rute Privat (Butuh Login)
+  // === RUTE PRIVAT (BUTUH LOGIN) ===
   {
     path: "/dashboard",
     name: "Dashboard",
@@ -39,22 +43,18 @@ const routes = [
     component: KelolaASM,
     meta: { requiresAuth: true },
   },
+  
+  // -- Rute Kelas 3-5 (Kak Ali) --
   {
-    path: "/tugas-besar",
-    name: "WaliKelas67",
-    component: WaliKelas67,
+    path: "/absensi",
+    name: "Absensi",
+    component: Absensi,
     meta: { requiresAuth: true },
   },
   {
     path: "/tugas",
     name: "Tugas",
     component: Tugas,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/absensi",
-    name: "Absensi",
-    component: Absensi,
     meta: { requiresAuth: true },
   },
   {
@@ -69,6 +69,28 @@ const routes = [
     component: Haporseaon,
     meta: { requiresAuth: true },
   },
+
+  // -- Rute Kelas 6-7 (Bang Samuel) --
+  {
+    path: "/absensi-samuel",
+    name: "AbsensiSamuel",
+    component: AbsensiSamuel,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/tugas-besar",
+    name: "WaliKelas67",
+    component: WaliKelas67,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/penilaian-samuel",
+    name: "PenilaianSamuel",
+    component: PenilaianSamuel,
+    meta: { requiresAuth: true },
+  },
+
+  // -- Rute Umum --
   {
     path: "/laporan-akhir",
     name: "LaporanAkhir",

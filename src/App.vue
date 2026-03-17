@@ -32,7 +32,7 @@
         
         <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
           <div class="text-[10px] font-bold text-gray-500 uppercase px-3 mb-2 mt-1 tracking-wider">Menu Utama</div>
-          <router-link @click="isSidebarOpen = false" to="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
+          <router-link @click="isSidebarOpen = false" to="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">🏠</span> Dashboard
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/kelola-asm" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
@@ -40,29 +40,37 @@
           </router-link>
         </div>
 
-        <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
-          <div class="text-[10px] font-bold text-gray-500 uppercase px-3 mb-2 mt-1 tracking-wider">Aktivitas Harian</div>
+        <div v-if="currentUserEmail === 'ali.sinaga@hkbp.com'" class="bg-teal-900/10 border border-teal-900/30 rounded-xl p-2 shadow-sm">
+          <div class="text-[10px] font-bold text-teal-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 3-5</div>
           <router-link @click="isSidebarOpen = false" to="/absensi" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
-            <span class="text-lg">📋</span> Absensi Kehadiran
+            <span class="text-lg">📋</span> Absensi (3-5)
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/tugas" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
-            <span class="text-lg">📗</span> Wali Kelas 3-5 (Ali)
+            <span class="text-lg">📗</span> Wali Kelas Review
           </router-link>
-          <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
-            <span class="text-lg">📘</span> Wali Kelas 6-7 (Samuel)
-          </router-link>
-        </div>
-
-        <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
-          <div class="text-[10px] font-bold text-gray-500 uppercase px-3 mb-2 mt-1 tracking-wider">Penilaian Hafalan</div>
           <router-link @click="isSidebarOpen = false" to="/penilaian" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">📖</span> Penilaian Titah
           </router-link>
           <router-link @click="isSidebarOpen = false" to="/haporseaon" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
             <span class="text-lg">⛪</span> Hata Haporseaon
           </router-link>
-          <div class="border-t border-gray-800 my-2"></div>
-          <router-link @click="isSidebarOpen = false" to="/laporan-akhir" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-teal-400 border-l-4 border-teal-400 font-medium text-white">
+        </div>
+
+        <div v-if="currentUserEmail === 'samuel@hkbp.com'" class="bg-sky-900/10 border border-sky-900/30 rounded-xl p-2 shadow-sm">
+          <div class="text-[10px] font-bold text-sky-500 uppercase px-3 mb-2 mt-1 tracking-wider">Fasilitator Kelas 6-7</div>
+          <router-link @click="isSidebarOpen = false" to="/absensi-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">📋</span> Absensi (6-7)
+          </router-link>
+          <router-link @click="isSidebarOpen = false" to="/tugas-besar" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">📘</span> Wali Kelas Review
+          </router-link>
+          <router-link @click="isSidebarOpen = false" to="/penilaian-samuel" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-sky-400 border-l-4 border-sky-400 font-medium text-white">
+            <span class="text-lg">⭐</span> Penilaian Custom
+          </router-link>
+        </div>
+
+        <div class="bg-[#151e32] border border-gray-800/60 rounded-xl p-2 shadow-sm">
+          <router-link @click="isSidebarOpen = false" to="/laporan-akhir" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#1e293b] transition duration-200" active-class="bg-[#1e293b] text-red-400 border-l-4 border-red-400 font-medium text-white">
             <span class="text-lg">📑</span> Laporan Akhir
           </router-link>
         </div>
@@ -120,25 +128,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue' // Tambahkan computed
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase } from './supabase'
-import { useRouter, useRoute } from 'vue-router' // Tambahkan useRoute
 
 const router = useRouter()
-const route = useRoute() // Panggil useRoute
-
-const showLogoutModal = ref(false)
 const isSidebarOpen = ref(false)
+const currentUserEmail = ref('') // Menyimpan email yang sedang login
 
-// Cek apakah halaman yang dibuka adalah Landing Page ATAU Login
-const isPublicRoute = computed(() => {
-  return route.name === 'LandingPage' || route.name === 'Login'
+// Mengecek siapa yang sedang login saat aplikasi dibuka
+onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    currentUserEmail.value = user.email
+  }
 })
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
-  showLogoutModal.value = false
-  router.push({ name: 'Login' })
+  router.push('/login')
 }
 </script>
 
