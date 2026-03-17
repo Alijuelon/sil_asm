@@ -8,7 +8,6 @@
     </div>
 
     <div class="bg-sky-900/20 border border-sky-800 p-4 sm:p-5 rounded-xl shadow-lg flex flex-col xl:flex-row gap-4 xl:items-end">
-      
       <div class="flex flex-col gap-2 w-full xl:w-32">
         <label class="font-medium text-sky-300 text-sm">Hari Kegiatan:</label>
         <select 
@@ -23,7 +22,6 @@
       <div class="flex-1 flex flex-col gap-2 w-full">
         <label class="font-medium text-sky-300 text-sm">Pilih Topik Penilaian:</label>
         <div class="flex flex-col sm:flex-row gap-3">
-          
           <select 
             v-model="selectedMode"
             class="sm:w-1/2 bg-[#0f172a] border border-gray-700 rounded-lg p-2.5 text-white focus:border-sky-500 focus:outline-none transition font-bold"
@@ -49,13 +47,33 @@
     </div>
 
     <div v-if="activeTopic">
-      <div class="bg-[#151e32] border border-gray-800 p-4 rounded-xl shadow-lg mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <h2 class="text-lg font-bold text-sky-400">Menilai: <span class="text-white border-b border-sky-500">"{{ activeTopic }}"</span> <span class="text-gray-500 text-sm ml-2">(Hari Ke-{{ selectedDay }})</span></h2>
+      
+      <div class="bg-[#151e32] border border-gray-800 p-4 rounded-xl shadow-lg mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         
-        <div class="flex gap-2 w-full sm:w-auto">
-          <button @click="exportToPDF('left')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Cetak Kls 3-5</button>
-          <button @click="exportToPDF('right')" class="bg-[#0f172a] border border-gray-700 hover:bg-sky-900 text-sky-400 px-3 py-1.5 rounded transition text-sm font-medium">📄 Cetak Kls 6-7</button>
+        <div class="flex items-center flex-wrap gap-3">
+          <h2 class="text-lg font-bold text-sky-400">
+            Menilai: <span class="text-white border-b border-sky-500">"{{ activeTopic }}"</span> 
+            <span class="text-gray-500 text-sm ml-2">(H-{{ selectedDay }})</span>
+          </h2>
+          <button @click="deleteTopic" class="text-xs bg-red-900/40 text-red-400 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg border border-red-800/50 transition flex items-center gap-1 font-bold">
+            🗑️ Hapus Topik
+          </button>
         </div>
+        
+        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+          <div class="flex flex-wrap gap-1 bg-[#0f172a] border border-gray-700 p-1.5 rounded-lg">
+            <span class="text-xs text-gray-500 font-bold px-2 py-1.5">Kls 3-5:</span>
+            <button @click="exportToPDF('left')" class="bg-teal-900/30 text-teal-400 hover:bg-teal-800 px-3 py-1.5 rounded transition text-xs font-medium">📄 H-{{ selectedDay }}</button>
+            <button @click="export7DaysPDF('left')" class="bg-teal-600 text-white hover:bg-teal-700 px-3 py-1.5 rounded transition text-xs font-bold shadow-md">📑 Rekap 7 Hari</button>
+          </div>
+          
+          <div class="flex flex-wrap gap-1 bg-[#0f172a] border border-gray-700 p-1.5 rounded-lg">
+            <span class="text-xs text-gray-500 font-bold px-2 py-1.5">Kls 6-7:</span>
+            <button @click="exportToPDF('right')" class="bg-sky-900/30 text-sky-400 hover:bg-sky-800 px-3 py-1.5 rounded transition text-xs font-medium">📄 H-{{ selectedDay }}</button>
+            <button @click="export7DaysPDF('right')" class="bg-sky-600 text-white hover:bg-sky-700 px-3 py-1.5 rounded transition text-xs font-bold shadow-md">📑 Rekap 7 Hari</button>
+          </div>
+        </div>
+
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -194,7 +212,7 @@
     </div>
 
     <div v-if="toastMsg" class="fixed bottom-6 right-6 bg-sky-500 text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform transition-all z-50 font-bold">
-      <span>💾</span> {{ toastMsg }}
+      <span>{{ toastIcon }}</span> {{ toastMsg }}
     </div>
   </div>
 </template>
@@ -214,16 +232,17 @@ const activeTopic = ref('')
 const allStudents = ref([])
 
 const toastMsg = ref('')
+const toastIcon = ref('💾')
 const pageLeft = ref(1)
 const pageRight = ref(1)
 const itemsPerPage = 10 
 
-const showToast = (message) => {
+const showToast = (message, icon = '💾') => {
   toastMsg.value = message
-  setTimeout(() => toastMsg.value = '', 2000)
+  toastIcon.value = icon
+  setTimeout(() => toastMsg.value = '', 3000)
 }
 
-// === LOGIKA POIN BARU (MENYESUAIKAN GAMBAR) ===
 const getPoint = (grade) => {
   switch (grade) {
     case 'Hari 1': return 100
@@ -304,6 +323,29 @@ const handleDayChange = () => {
   if (activeTopic.value) loadPenilaianData()
 }
 
+// === FITUR HAPUS TOPIK ===
+const deleteTopic = async () => {
+  if (!activeTopic.value) return
+  
+  const confirmDelete = confirm(`⚠️ PERINGATAN!\n\nApakah Anda yakin ingin menghapus topik "${activeTopic.value}"?\nSeluruh data nilai anak-anak di topik ini (dari Hari 1 sampai 7) akan hilang permanen!`)
+  
+  if (confirmDelete) {
+    // Hapus dari database Supabase
+    const { error } = await supabase.from('hafalan').delete().eq('jenis_hafalan', activeTopic.value)
+    
+    if (error) {
+      alert("Gagal menghapus topik: " + error.message)
+      return
+    }
+
+    // Update UI
+    availableTopics.value = availableTopics.value.filter(t => t !== activeTopic.value)
+    activeTopic.value = ''
+    selectedMode.value = ''
+    showToast('Topik berhasil dihapus!', '🗑️')
+  }
+}
+
 const filteredLeft = computed(() => allStudents.value.filter(s => [3, 4, 5].includes(s.kelas)))
 const totalPagesLeft = computed(() => Math.ceil(filteredLeft.value.length / itemsPerPage))
 const paginatedLeft = computed(() => {
@@ -341,7 +383,6 @@ const saveHafalan = async (student, isSilent = false) => {
   if (!isSilent) showToast(`Tersimpan: ${student.nama_lengkap} (${skor} pt)`)
 }
 
-// === FUNGSI PINTAR: SET OTOMATIS BERDASARKAN HARI YANG DIPILIH ===
 const markAllToday = async (section) => {
   const targetGrade = `Hari ${selectedDay.value}`
   const listToUpdate = section === 'left' ? filteredLeft.value : filteredRight.value
@@ -355,12 +396,13 @@ const markAllToday = async (section) => {
   showToast(`Semua anak otomatis ditandai Lancar Hari ${selectedDay.value}!`)
 }
 
+// === CETAK PDF PER HARI ===
 const exportToPDF = (mode) => {
   const doc = new jsPDF()
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
   doc.setFontSize(16)
-  doc.text(`Penilaian Kustom: ${activeTopic.value}`, 14, 15)
+  doc.text(`Penilaian: ${activeTopic.value}`, 14, 15)
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
   
@@ -385,6 +427,63 @@ const exportToPDF = (mode) => {
       2: { halign: 'center' },
       3: { halign: 'center' },
       4: { halign: 'center', fontStyle: 'bold' }
+    }
+  })
+  
+  window.open(URL.createObjectURL(doc.output('blob')), '_blank')
+}
+
+// === CETAK PDF REKAP 7 HARI ===
+const export7DaysPDF = async (mode) => {
+  const doc = new jsPDF()
+  const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  
+  // Ambil semua data dari hari 1-7 khusus topik ini
+  const { data: allHafalan, error } = await supabase
+    .from('hafalan')
+    .select('*')
+    .eq('jenis_hafalan', activeTopic.value)
+
+  if (error) {
+    alert("Gagal mengambil rekap data!")
+    return
+  }
+
+  doc.setFontSize(16)
+  doc.text(`Rekap 7 Hari Penilaian: ${activeTopic.value}`, 14, 15)
+  doc.setFontSize(10)
+  doc.setTextColor(100, 100, 100)
+  
+  let labelKelas = mode === 'left' ? 'Kelas 3-5' : 'Kelas 6-7'
+  let targetData = mode === 'left' ? filteredLeft.value : filteredRight.value
+  
+  doc.text(`Kategori: ${labelKelas} | Seluruh Hari Kegiatan`, 14, 22)
+  doc.text(`Dicetak pada: ${tanggal}`, 14, 27)
+  
+  // Mapping matrix data untuk 7 hari
+  const bodyData = targetData.map((student, idx) => {
+    let row = [idx + 1, student.nama_lengkap, `Kls ${student.kelas}`]
+    
+    // Looping mencari skor hari ke 1 sampai 7
+    for(let d = 1; d <= 7; d++) {
+      let record = allHafalan.find(h => h.student_id === student.id && h.hari === d)
+      row.push(record ? record.skor : '-')
+    }
+    return row
+  })
+  
+  autoTable(doc, {
+    startY: 32,
+    head: [['No', 'Nama', 'Kls', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']],
+    body: bodyData,
+    theme: 'grid',
+    headStyles: { fillColor: mode === 'left' ? [20, 184, 166] : [14, 165, 233] }, 
+    columnStyles: {
+      0: { halign: 'center' },
+      2: { halign: 'center' },
+      3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
+      6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
+      9: { halign: 'center' }
     }
   })
   
