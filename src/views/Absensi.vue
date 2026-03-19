@@ -44,8 +44,8 @@
             ✅ Hadir Tepat Waktu Semua
           </button>
           
-          <button @click="exportToPDF" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg transition shadow-lg text-sm font-bold whitespace-nowrap flex items-center justify-center gap-2">
-            📄 Cetak Absen (H{{ selectedDay }})
+          <button @click="export7DaysPDF" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg transition shadow-lg text-sm font-bold whitespace-nowrap flex items-center justify-center gap-2">
+            📑 Cetak Rekap 7 Hari
           </button>
         </div>
       </div>
@@ -131,25 +131,18 @@ const getSkor = (status) => {
   }
 }
 
-// === PENGAMANAN DATA: HANYA TARIK KELAS 3, 4, 5 ===
 const fetchStudents = async () => {
   currentPage.value = 1
   
-  // 1. Tarik HANYA murid kelas 3, 4, dan 5
-  const { data: students, error: err1 } = await supabase
-    .from('students')
-    .select('*')
-    .in('kelas', [3, 4, 5]) // Pastikan ini hanya mengambil array angka kelas tersebut
+  const { data: students, error: err1 } = await supabase.from('students').select('*').in('kelas', [3, 4, 5])
 
   if (err1) {
     console.error("Gagal mengambil data murid:", err1)
     return
   }
 
-  // 2. Ambil ID murid-murid tersebut untuk mencocokkan absennya
   const studentIds = students.map(s => s.id)
 
-  // 3. Tarik HANYA data absensi milik ID murid tersebut (Aman dari data kelas lain)
   const { data: attendance, error: err2 } = await supabase
     .from('attendance')
     .select('*')
@@ -221,36 +214,71 @@ const markAllOnTime = async () => {
   showToast(`Semua anak kelas 3-5 ditandai Tepat Waktu!`)
 }
 
-const exportToPDF = () => {
-  const doc = new jsPDF() 
+// === FUNGSI EKSPOR PDF 7 HARI ===
+const export7DaysPDF = async () => {
+  const studentIds = filteredStudents.value.map(s => s.id)
+  
+  if (studentIds.length === 0) return alert("Belum ada data murid untuk dicetak!")
+
+  // Tarik SEMUA data absen dari hari 1 sampai 7 untuk murid kelas 3-5
+  const { data: allAttendance, error } = await supabase
+    .from('attendance')
+    .select('student_id, hari, skor')
+    .in('student_id', studentIds)
+
+  if (error) {
+    alert("Gagal mengambil data dari server!")
+    return
+  }
+
+  const doc = new jsPDF('landscape') // Landscape agar muat banyak kolom
   const tanggal = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   
   doc.setFontSize(16)
-  doc.text(`Laporan Absensi SIL HKBP - Hari ${selectedDay.value}`, 14, 15)
+  doc.text(`Rekapitulasi Absensi 7 Hari SIL HKBP 2026`, 14, 15)
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)
-  doc.text(`Fasilitator: Ali | Kelas 3-5 | Dicetak: ${tanggal}`, 14, 22)
+  doc.text(`Fasilitator: Ali Sinaga | Kategori: Kelas 3-5 | Dicetak: ${tanggal}`, 14, 22)
 
-  const bodyData = filteredStudents.value.map((s, idx) => [
-    idx + 1, s.nama_lengkap, `Kelas ${s.kelas}`, s.status ? getSkor(s.status) : '0' 
-  ])
+  // Susun baris data untuk tiap murid
+  const bodyData = filteredStudents.value.map((student, idx) => {
+    let row = [idx + 1, student.nama_lengkap, `Kls ${student.kelas}`]
+    let totalSkor = 0
+
+    // Looping dari Hari 1 ke Hari 7
+    for (let d = 1; d <= 7; d++) {
+      let record = allAttendance.find(a => a.student_id === student.id && a.hari === d)
+      let skorHariIni = record ? record.skor : 0
+      
+      row.push(skorHariIni.toString())
+      totalSkor += skorHariIni
+    }
+
+    // Hitung Rata-rata akhir (dibagi 7)
+    let rataRata = Math.round(totalSkor / 7)
+    row.push(rataRata.toString())
+
+    return row
+  })
   
   autoTable(doc, {
     startY: 28,
-    head: [['No', 'Nama Lengkap', 'Kelas', 'Nilai Kehadiran']], 
+    head: [['No', 'Nama Lengkap', 'Kelas', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'Rata-rata']], 
     body: bodyData,
     theme: 'grid',
-    headStyles: { fillColor: [20, 184, 166] }, // Warna Teal
+    headStyles: { fillColor: [20, 184, 166], halign: 'center' }, // Tema warna Teal Kak Ali
     columnStyles: {
-      0: { halign: 'center' },
-      2: { halign: 'center' },
-      3: { halign: 'center', fontStyle: 'bold' }
+      0: { halign: 'center', cellWidth: 10 },
+      2: { halign: 'center', cellWidth: 15 },
+      // Rata tengah semua kolom H1 - H7
+      3: { halign: 'center' }, 4: { halign: 'center' }, 5: { halign: 'center' },
+      6: { halign: 'center' }, 7: { halign: 'center' }, 8: { halign: 'center' },
+      9: { halign: 'center' },
+      10: { halign: 'center', fontStyle: 'bold', textColor: [20, 184, 166] } // Rata-rata di-bold
     }
   })
 
-  const pdfBlob = doc.output('blob')
-  const pdfUrl = URL.createObjectURL(pdfBlob)
-  window.open(pdfUrl, '_blank')
+  window.open(URL.createObjectURL(doc.output('blob')), '_blank')
 }
 </script>
 
